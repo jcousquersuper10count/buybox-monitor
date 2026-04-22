@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BuyBox Monitor — Super10count</title>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--bg0:#0d0d1a;--bg1:#12122a;--bg2:#1a1a3a;--bg3:#20204a;--border:rgba(120,120,255,0.15);--border2:rgba(120,120,255,0.3);--text:#e8e8ff;--muted:#6868aa;--c1:#00f5d4;--c2:#f72585;--c3:#7209b7;--c4:#4cc9f0;--c5:#f77f00;--c6:#a8ff3e;--c7:#ff006e;--c8:#8338ec;}
+:root{--bg0:#0d0d1a;--bg1:#12122a;--bg2:#1a1a3a;--bg3:#20204a;--border:rgba(120,120,255,0.15);--border2:rgba(120,120,255,0.3);--text:#e8e8ff;--muted:#8888cc;--c1:#00f5d4;--c2:#f72585;--c3:#7209b7;--c4:#4cc9f0;--c5:#f77f00;--c6:#a8ff3e;--c7:#ff006e;--c8:#8338ec;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Exo 2',sans-serif;background:var(--bg0);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body{font-family:'Exo 2',sans-serif;background:var(--bg0);color:var(--text);min-height:100vh;overflow-x:hidden;font-weight:400;letter-spacing:0.01em;}
 body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 50%,rgba(114,9,183,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(0,245,212,0.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
 
 header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;}
@@ -21,16 +21,19 @@ header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop
 .header-right{display:flex;align-items:center;gap:12px;}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1);animation:blink 1.5s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.last-update{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);}
+.last-update{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);}
 .refresh-btn{background:transparent;border:1px solid var(--border2);color:var(--c1);padding:7px 16px;border-radius:6px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;}
 .refresh-btn:hover{background:rgba(0,245,212,0.1);box-shadow:0 0 16px rgba(0,245,212,0.25);}
+.export-btn{background:transparent;border:1px solid rgba(168,255,62,0.4);color:var(--c6);padding:7px 16px;border-radius:6px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;}
+.export-btn:hover{background:rgba(168,255,62,0.1);box-shadow:0 0 16px rgba(168,255,62,0.2);}
+
 
 .container{max-width:1600px;margin:0 auto;padding:2rem;position:relative;z-index:1;}
 
 /* BRAND FILTER — double dropdown */
 .brand-bar{display:flex;align-items:center;gap:12px;margin-bottom:2rem;flex-wrap:wrap;background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;}
-.brand-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;}
-.brand-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 32px 7px 12px;border-radius:8px;font-size:13px;font-family:'Exo 2',sans-serif;font-weight:600;cursor:pointer;outline:none;transition:all 0.2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236868aa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.brand-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;}
+.brand-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:8px 36px 8px 14px;border-radius:8px;font-size:14px;font-family:'Exo 2',sans-serif;font-weight:600;cursor:pointer;outline:none;transition:all 0.2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236868aa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
 .brand-select:focus{border-color:var(--c1);box-shadow:0 0 12px rgba(0,245,212,0.15);}
 .brand-select option{background:var(--bg2);color:var(--text);}
 .brand-active-tag{display:flex;align-items:center;gap:6px;background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.25);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--c1);}
@@ -47,13 +50,13 @@ header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop
 .kpi-card.c3::before{background:linear-gradient(90deg,var(--c5),var(--c2));}
 .kpi-card.c4::before{background:linear-gradient(90deg,var(--c3),var(--c8));}
 .kpi-card:hover{border-color:var(--border2);}
-.kpi-label{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
+.kpi-label{font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
 .kpi-value{font-size:36px;font-weight:800;line-height:1;}
 .kpi-card.c1 .kpi-value{color:var(--c1);text-shadow:0 0 20px rgba(0,245,212,0.4);}
 .kpi-card.c2 .kpi-value{color:var(--c2);text-shadow:0 0 20px rgba(247,37,133,0.4);}
 .kpi-card.c3 .kpi-value{color:var(--c5);text-shadow:0 0 20px rgba(247,127,0,0.4);}
 .kpi-card.c4 .kpi-value{font-size:18px;padding-top:4px;color:var(--c4);text-shadow:0 0 20px rgba(76,201,240,0.4);}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:8px;font-family:'Share Tech Mono',monospace;}
+.kpi-sub{font-size:12px;color:var(--muted);margin-top:8px;font-family:'Share Tech Mono',monospace;}
 .kpi-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:0.15;filter:blur(20px);}
 .kpi-card.c1 .kpi-glow{background:var(--c1);}
 .kpi-card.c2 .kpi-glow{background:var(--c2);}
@@ -62,53 +65,53 @@ header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop
 
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
 .card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;}
-.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:1.25rem;font-family:'Share Tech Mono',monospace;}
+.card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:1.25rem;font-family:'Share Tech Mono',monospace;}
 .chart-wrap{position:relative;height:200px;}
 
 .conc-table{width:100%;border-collapse:collapse;}
-.conc-table th{font-family:'Share Tech Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
-.conc-table td{padding:8px 10px;font-size:12px;font-family:'Share Tech Mono',monospace;border-bottom:1px solid rgba(120,120,255,0.06);vertical-align:middle;}
+.conc-table th{font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.conc-table td{padding:8px 10px;font-size:13px;font-family:'Share Tech Mono',monospace;border-bottom:1px solid rgba(120,120,255,0.06);vertical-align:middle;}
 .conc-table tr:hover td{background:rgba(120,120,255,0.05);}
 .bar-wrap{display:flex;align-items:center;gap:8px;}
 .bar-bg{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;min-width:50px;}
 .bar-fill{height:100%;border-radius:2px;}
-.evo-up{color:#ff006e;font-size:10px;font-weight:700;}
-.evo-down{color:var(--c1);font-size:10px;font-weight:700;}
-.evo-flat{color:var(--muted);font-size:10px;}
+.evo-up{color:#ff006e;font-size:12px;font-weight:700;}
+.evo-down{color:var(--c1);font-size:12px;font-weight:700;}
+.evo-flat{color:var(--muted);font-size:12px;}
 
 .heatmap-grid{display:grid;gap:3px;font-family:'Share Tech Mono',monospace;font-size:10px;}
-.hm-header{color:var(--muted);text-align:center;padding:4px 2px;}
-.hm-row-label{color:var(--muted);padding:4px 2px;display:flex;align-items:center;font-size:10px;}
-.hm-cell{border-radius:4px;text-align:center;font-weight:600;font-size:11px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+.hm-header{color:var(--muted);text-align:center;padding:4px 2px;font-size:12px;}
+.hm-row-label{color:var(--muted);padding:4px 2px;display:flex;align-items:center;font-size:11px;}
+.hm-cell{border-radius:4px;text-align:center;font-weight:700;font-size:13px;min-height:32px;display:flex;align-items:center;justify-content:center;}
 
 .table-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
 .filter-tabs{display:flex;gap:6px;flex-wrap:wrap;}
-.tab{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:'Exo 2',sans-serif;text-transform:uppercase;letter-spacing:0.05em;}
+.tab{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:'Exo 2',sans-serif;text-transform:uppercase;letter-spacing:0.05em;}
 .tab.active{border-color:var(--c1);color:var(--c1);background:rgba(0,245,212,0.08);}
 .search-box{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:20px;font-size:12px;font-family:'Share Tech Mono',monospace;width:200px;outline:none;}
 .search-box::placeholder{color:var(--muted);}
 .search-box:focus{border-color:var(--border2);}
 
 .sku-table{width:100%;border-collapse:collapse;}
-.sku-table thead th{font-family:'Share Tech Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;}
+.sku-table thead th{font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;}
 .sku-table thead th:hover{color:var(--text);}
 .sku-table tbody tr{border-bottom:1px solid rgba(120,120,255,0.07);transition:background 0.1s;}
 .sku-table tbody tr:hover{background:rgba(120,120,255,0.06);}
-.sku-table tbody td{padding:10px 12px;font-size:12px;font-family:'Share Tech Mono',monospace;}
-.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.05em;font-family:'Exo 2',sans-serif;text-transform:uppercase;}
+.sku-table tbody td{padding:10px 12px;font-size:13px;font-family:'Share Tech Mono',monospace;}
+.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.05em;font-family:'Exo 2',sans-serif;text-transform:uppercase;}
 .badge-win{background:rgba(0,245,212,0.12);color:var(--c1);border:1px solid rgba(0,245,212,0.2);}
 .badge-lose{background:rgba(247,37,133,0.12);color:var(--c2);border:1px solid rgba(247,37,133,0.2);}
 .badge-amazon{background:rgba(247,127,0,0.12);color:var(--c5);border:1px solid rgba(247,127,0,0.2);}
 .ecart-pos{color:var(--c2);}
 .ecart-neg{color:var(--c1);}
 .ecart-neu{color:var(--muted);}
-.brand-tag{font-size:10px;color:var(--c4);background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.15);padding:1px 7px;border-radius:8px;}
-.supplier-tag{font-size:10px;color:var(--c6);background:rgba(168,255,62,0.08);border:1px solid rgba(168,255,62,0.15);padding:1px 7px;border-radius:8px;}
+.brand-tag{font-size:11px;font-weight:600;color:var(--c4);background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.15);padding:1px 7px;border-radius:8px;}
+.supplier-tag{font-size:11px;font-weight:600;color:var(--c6);background:rgba(168,255,62,0.08);border:1px solid rgba(168,255,62,0.15);padding:1px 7px;border-radius:8px;}
 
 .pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:1.5rem;}
 .page-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:6px;font-size:11px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;}
 .page-btn:hover,.page-btn.active{border-color:var(--c1);color:var(--c1);}
-.page-info{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);}
+.page-info{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);}
 
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:20px;}
 .loading-ring{width:48px;height:48px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--c1);animation:spin 0.8s linear infinite;}
@@ -117,11 +120,12 @@ header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop
 .error-box{background:rgba(247,37,133,0.08);border:1px solid rgba(247,37,133,0.2);border-radius:12px;padding:2rem;margin:2rem 0;text-align:center;}
 .error-box h3{color:var(--c2);margin-bottom:8px;}
 .error-box p{color:var(--muted);font-size:14px;line-height:1.6;}
-.section-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+.section-label{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
 footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);position:relative;z-index:1;}
 footer a{color:var(--c1);text-decoration:none;}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.container{padding:1rem}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -137,6 +141,7 @@ footer a{color:var(--c1);text-decoration:none;}
     <div class="header-right">
       <div class="live-dot"></div>
       <div class="last-update" id="lastUpdate">Chargement…</div>
+      <button class="export-btn" onclick="exporterExcel()">↓ Export Excel</button>
       <button class="refresh-btn" onclick="chargerDonnees()">↻ Refresh</button>
     </div>
   </div>
@@ -539,6 +544,88 @@ function goPage(n){currentPage=n;rendrePage();}
 function filtrer(f,btn){currentFilter=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');appliquerFiltre();}
 function rechercherSKU(v){currentSearch=v;appliquerFiltre();}
 function trierPar(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}appliquerFiltre();}
+
+
+function exporterExcel(){
+  if(!filteredData.length){alert('Aucune donnée à exporter. Appliquez un filtre d\'abord.');return;}
+
+  // Onglet 1 : résultat du filtre actuel
+  const snap = dernierSnapshot();
+  const lignesFiltrees = filteredData.map(r=>({
+    'SKU': r.sku,
+    'Marque': r.marque,
+    'Fournisseur': r.fournisseur,
+    'Gagnant BuyBox': r.gagnant,
+    'Prix BuyBox (€)': r.prixBB,
+    'Notre prix (€)': r.prixClient,
+    'Écart (€)': r.ecartEur,
+    'Écart (%)': r.ecartPct,
+    'Super10count gagnant': r.estGagnant ? 'OUI' : 'NON',
+    'Snapshot': r.horodatage
+  }));
+
+  // Onglet 2 : analyse concurrents (dernier snapshot)
+  const snaps=[...new Set(allData.map(r=>r.horodatage))].sort();
+  const dH=snaps[snaps.length-1];
+  const snapD=filtreMarque(allData.filter(r=>r.horodatage===dH&&!isExclu(r.gagnant)));
+  const totalD=new Set(snapD.map(r=>r.sku)).size;
+  const cD={};
+  snapD.filter(r=>!r.estGagnant).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
+  cD['Super10count']=snapD.filter(r=>r.estGagnant).length;
+  const lignesConcurrents = Object.entries(cD)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([nom,nb])=>({
+      'Concurrent': nom,
+      'Nb SKUs BuyBox': nb,
+      '% BuyBox': totalD>0?parseFloat((nb/totalD*100).toFixed(1)):0
+    }));
+
+  // Onglet 3 : tous les SKUs avec marque + fournisseur (vue complète)
+  const allSnap = dernierSnapshot();
+  const lignesAll = allSnap.map(r=>({
+    'SKU': r.sku,
+    'Marque': r.marque,
+    'Fournisseur': r.fournisseur,
+    'Gagnant BuyBox': r.gagnant,
+    'Prix BuyBox (€)': r.prixBB,
+    'Notre prix (€)': r.prixClient,
+    'Écart (%)': r.ecartPct,
+    'Statut': r.estGagnant ? 'GAGNE' : 'PERDU'
+  }));
+
+  const wb = XLSX.utils.book_new();
+
+  const ws1 = XLSX.utils.json_to_sheet(lignesFiltrees);
+  _styleSheet(ws1, lignesFiltrees.length);
+  XLSX.utils.book_append_sheet(wb, ws1, 'Filtre actuel');
+
+  const ws2 = XLSX.utils.json_to_sheet(lignesConcurrents);
+  _styleSheet(ws2, lignesConcurrents.length);
+  XLSX.utils.book_append_sheet(wb, ws2, 'Concurrents BuyBox');
+
+  const ws3 = XLSX.utils.json_to_sheet(lignesAll);
+  _styleSheet(ws3, lignesAll.length);
+  XLSX.utils.book_append_sheet(wb, ws3, 'Snapshot complet');
+
+  const date = new Date().toISOString().slice(0,10);
+  const marqueLabel = currentBrand ? '_'+currentBrand.replace(/[^a-zA-Z0-9]/g,'') : '';
+  XLSX.writeFile(wb, `BuyBox_Super10count${marqueLabel}_${date}.xlsx`);
+}
+
+function _styleSheet(ws, nbRows){
+  // Largeurs de colonnes
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  const cols = [];
+  for(let c=range.s.c; c<=range.e.c; c++){
+    let maxW=10;
+    for(let r=range.s.r; r<=range.e.r; r++){
+      const cell = ws[XLSX.utils.encode_cell({r,c})];
+      if(cell&&cell.v) maxW=Math.max(maxW, String(cell.v).length+2);
+    }
+    cols.push({wch:Math.min(maxW,40)});
+  }
+  ws['!cols']=cols;
+}
 
 chargerDonnees();
 setInterval(chargerDonnees,5*60*1000);
