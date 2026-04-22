@@ -4,163 +4,260 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BuyBox Monitor — Super10count</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a26;
-    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
-    --text: #f0f0f8; --muted: #6b6b88;
-    --accent: #00e5a0; --accent2: #ff6b6b; --accent3: #ffd166; --accent4: #74b9ff;
-    --win: #00e5a0; --lose: #ff6b6b;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  header { padding: 2rem 2.5rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(10,10,15,0.95); backdrop-filter: blur(12px); z-index: 100; }
-  .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
-  .logo-name { font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
-  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
-  .header-right { display: flex; align-items: center; gap: 16px; }
-  .last-update { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .refresh-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 7px 14px; border-radius: 6px; font-size: 12px; font-family: 'Syne', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
-  main { padding: 2rem 2.5rem; max-width: 1400px; margin: 0 auto; }
-  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 20px; }
-  .loading-ring { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border2); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted); }
-  .error-box { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); border-radius: 10px; padding: 2rem; margin: 2rem 0; text-align: center; }
-  .error-box h3 { color: var(--accent2); margin-bottom: 8px; }
-  .error-box p { color: var(--muted); font-size: 14px; line-height: 1.6; }
-  .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
-  .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; transition: border-color 0.2s; }
-  .kpi-card:hover { border-color: var(--border2); }
-  .kpi-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .kpi-value { font-size: 32px; font-weight: 800; line-height: 1; }
-  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; font-family: 'DM Mono', monospace; }
-  .kpi-card.win .kpi-value { color: var(--win); }
-  .kpi-card.warn .kpi-value { color: var(--accent3); }
-  .kpi-card.danger .kpi-value { color: var(--lose); }
-  .kpi-card.info .kpi-value { color: var(--accent4); }
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
-  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-  .chart-title { font-size: 13px; font-weight: 700; margin-bottom: 1.25rem; letter-spacing: 0.02em; }
-  .chart-wrap { position: relative; height: 220px; }
-  .table-section { margin-bottom: 2.5rem; }
-  .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .filter-tabs { display: flex; gap: 6px; }
-  .tab { background: var(--bg2); border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-  .tab.active { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
-  .search-box { background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; font-size: 13px; font-family: 'DM Mono', monospace; width: 200px; outline: none; }
-  .search-box::placeholder { color: var(--muted); }
-  table { width: 100%; border-collapse: collapse; }
-  thead th { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); cursor: pointer; }
-  thead th:hover { color: var(--text); }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  tbody tr:hover { background: var(--bg3); }
-  tbody td { padding: 11px 14px; font-size: 13px; font-family: 'DM Mono', monospace; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .badge-win { background: rgba(0,229,160,0.12); color: var(--win); }
-  .badge-lose { background: rgba(255,107,107,0.12); color: var(--lose); }
-  .badge-amazon { background: rgba(255,209,102,0.12); color: var(--accent3); }
-  .ecart-positive { color: var(--lose); }
-  .ecart-negative { color: var(--win); font-size: 11px; }
-  .ecart-neutre { color: var(--muted); }
-  .heatmap-section { margin-bottom: 2.5rem; }
-  .heatmap-grid { display: grid; grid-template-columns: 80px repeat(6, 1fr); gap: 3px; font-family: 'DM Mono', monospace; font-size: 11px; }
-  .hm-header { color: var(--muted); text-align: center; padding: 6px 4px; }
-  .hm-row-label { color: var(--muted); padding: 6px 4px; display: flex; align-items: center; font-size: 11px; }
-  .hm-cell { border-radius: 4px; padding: 8px 4px; text-align: center; font-weight: 500; font-size: 12px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
-  .conc-table { width: 100%; border-collapse: collapse; }
-  .conc-table th { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-  .conc-table td { padding: 9px 12px; font-size: 12px; font-family: 'DM Mono', monospace; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
-  .conc-table tr:hover td { background: var(--bg3); }
-  .bar-wrap { display: flex; align-items: center; gap: 8px; }
-  .bar-bg { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; min-width: 60px; }
-  .bar-fill { height: 100%; border-radius: 3px; }
-  .evo-up { color: var(--lose); font-size: 11px; font-weight: 600; }
-  .evo-down { color: var(--win); font-size: 11px; font-weight: 600; }
-  .evo-flat { color: var(--muted); font-size: 11px; }
-  .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1.5rem; }
-  .page-btn { background: var(--bg2); border: 1px solid var(--border); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
-  .page-btn:hover, .page-btn.active { border-color: var(--accent); color: var(--accent); }
-  .page-info { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
-  footer { border-top: 1px solid var(--border); padding: 1.5rem 2.5rem; display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; }
-  .footer-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .footer-link { color: var(--accent); text-decoration: none; }
-  @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .charts-row { grid-template-columns: 1fr; } main { padding: 1.5rem; } }
+:root {
+  --bg0: #0d0d1a;
+  --bg1: #12122a;
+  --bg2: #1a1a3a;
+  --bg3: #20204a;
+  --border: rgba(120,120,255,0.15);
+  --border2: rgba(120,120,255,0.3);
+  --text: #e8e8ff;
+  --muted: #6868aa;
+  --c1: #00f5d4;
+  --c2: #f72585;
+  --c3: #7209b7;
+  --c4: #4cc9f0;
+  --c5: #f77f00;
+  --c6: #a8ff3e;
+  --c7: #ff006e;
+  --c8: #8338ec;
+  --glow1: rgba(0,245,212,0.25);
+  --glow2: rgba(247,37,133,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Exo 2',sans-serif;background:var(--bg0);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 50%,rgba(114,9,183,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(0,245,212,0.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;}
+.header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{display:flex;align-items:center;gap:14px;}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--c1),var(--c4));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#000;font-family:'Share Tech Mono',monospace;}
+.logo-text{font-size:16px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;background:linear-gradient(90deg,var(--c1),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-sub{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;letter-spacing:0.1em;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.last-update{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);}
+.refresh-btn{background:transparent;border:1px solid var(--border2);color:var(--c1);padding:7px 16px;border-radius:6px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;}
+.refresh-btn:hover{background:rgba(0,245,212,0.1);box-shadow:0 0 16px var(--glow1);}
+
+/* LAYOUT */
+.container{max-width:1600px;margin:0 auto;padding:2rem;position:relative;z-index:1;}
+
+/* BRAND FILTER BAR */
+.brand-bar{display:flex;align-items:center;gap:8px;margin-bottom:2rem;flex-wrap:wrap;}
+.brand-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-right:4px;}
+.brand-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'Exo 2',sans-serif;white-space:nowrap;}
+.brand-btn:hover{border-color:var(--border2);color:var(--text);}
+.brand-btn.active{border-color:var(--c1);color:var(--c1);background:rgba(0,245,212,0.08);box-shadow:0 0 12px rgba(0,245,212,0.15);}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.kpi-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;transition:border-color 0.3s;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
+.kpi-card.c1::before{background:linear-gradient(90deg,var(--c1),var(--c4));}
+.kpi-card.c2::before{background:linear-gradient(90deg,var(--c2),var(--c7));}
+.kpi-card.c3::before{background:linear-gradient(90deg,var(--c5),var(--c2));}
+.kpi-card.c4::before{background:linear-gradient(90deg,var(--c3),var(--c8));}
+.kpi-card:hover{border-color:var(--border2);}
+.kpi-label{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
+.kpi-value{font-size:36px;font-weight:800;line-height:1;}
+.kpi-card.c1 .kpi-value{color:var(--c1);text-shadow:0 0 20px rgba(0,245,212,0.4);}
+.kpi-card.c2 .kpi-value{color:var(--c2);text-shadow:0 0 20px rgba(247,37,133,0.4);}
+.kpi-card.c3 .kpi-value{color:var(--c5);text-shadow:0 0 20px rgba(247,127,0,0.4);}
+.kpi-card.c4 .kpi-value{font-size:18px;padding-top:4px;color:var(--c4);text-shadow:0 0 20px rgba(76,201,240,0.4);}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:8px;font-family:'Share Tech Mono',monospace;}
+.kpi-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:0.15;filter:blur(20px);}
+.kpi-card.c1 .kpi-glow{background:var(--c1);}
+.kpi-card.c2 .kpi-glow{background:var(--c2);}
+.kpi-card.c3 .kpi-glow{background:var(--c5);}
+.kpi-card.c4 .kpi-glow{background:var(--c4);}
+
+/* CHARTS ROW */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;}
+.card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:1.25rem;font-family:'Share Tech Mono',monospace;}
+.chart-wrap{position:relative;height:200px;}
+
+/* CONCURRENTS TABLE */
+.conc-table{width:100%;border-collapse:collapse;}
+.conc-table th{font-family:'Share Tech Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.conc-table td{padding:8px 10px;font-size:12px;font-family:'Share Tech Mono',monospace;border-bottom:1px solid rgba(120,120,255,0.06);vertical-align:middle;}
+.conc-table tr:hover td{background:rgba(120,120,255,0.05);}
+.bar-wrap{display:flex;align-items:center;gap:8px;}
+.bar-bg{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;min-width:50px;}
+.bar-fill{height:100%;border-radius:2px;}
+.evo-up{color:#ff006e;font-size:10px;font-weight:700;}
+.evo-down{color:var(--c1);font-size:10px;font-weight:700;}
+.evo-flat{color:var(--muted);font-size:10px;}
+
+/* HEATMAP */
+.heatmap-grid{display:grid;gap:3px;font-family:'Share Tech Mono',monospace;font-size:10px;}
+.hm-header{color:var(--muted);text-align:center;padding:4px 2px;}
+.hm-row-label{color:var(--muted);padding:4px 2px;display:flex;align-items:center;font-size:10px;}
+.hm-cell{border-radius:4px;text-align:center;font-weight:600;font-size:11px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+
+/* TABLE SKU */
+.table-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;}
+.tab{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:'Exo 2',sans-serif;text-transform:uppercase;letter-spacing:0.05em;}
+.tab.active{border-color:var(--c1);color:var(--c1);background:rgba(0,245,212,0.08);}
+.search-box{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:20px;font-size:12px;font-family:'Share Tech Mono',monospace;width:180px;outline:none;transition:border-color 0.2s;}
+.search-box:focus{border-color:var(--border2);}
+.search-box::placeholder{color:var(--muted);}
+.sku-table{width:100%;border-collapse:collapse;}
+.sku-table thead th{font-family:'Share Tech Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;}
+.sku-table thead th:hover{color:var(--text);}
+.sku-table tbody tr{border-bottom:1px solid rgba(120,120,255,0.07);transition:background 0.1s;}
+.sku-table tbody tr:hover{background:rgba(120,120,255,0.06);}
+.sku-table tbody td{padding:10px 12px;font-size:12px;font-family:'Share Tech Mono',monospace;}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.05em;font-family:'Exo 2',sans-serif;text-transform:uppercase;}
+.badge-win{background:rgba(0,245,212,0.12);color:var(--c1);border:1px solid rgba(0,245,212,0.2);}
+.badge-lose{background:rgba(247,37,133,0.12);color:var(--c2);border:1px solid rgba(247,37,133,0.2);}
+.badge-amazon{background:rgba(247,127,0,0.12);color:var(--c5);border:1px solid rgba(247,127,0,0.2);}
+.ecart-pos{color:var(--c2);}
+.ecart-neg{color:var(--c1);}
+.ecart-neu{color:var(--muted);}
+.brand-tag{font-size:10px;color:var(--c4);background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.15);padding:1px 7px;border-radius:8px;}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:1.5rem;}
+.page-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:6px;font-size:11px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;}
+.page-btn:hover,.page-btn.active{border-color:var(--c1);color:var(--c1);}
+.page-info{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* LOADING / ERROR */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:20px;}
+.loading-ring{width:48px;height:48px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--c1);animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);}
+.error-box{background:rgba(247,37,133,0.08);border:1px solid rgba(247,37,133,0.2);border-radius:12px;padding:2rem;margin:2rem 0;text-align:center;}
+.error-box h3{color:var(--c2);margin-bottom:8px;}
+.error-box p{color:var(--muted);font-size:14px;line-height:1.6;}
+
+/* SECTION LABEL */
+.section-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);position:relative;z-index:1;}
+footer a{color:var(--c1);text-decoration:none;}
+
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.container{padding:1rem}}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo">
-    <div class="logo-dot"></div>
-    <div>
-      <div class="logo-name">BuyBox Monitor</div>
-      <div class="logo-sub">super10count · amazon</div>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">BB</div>
+      <div>
+        <div class="logo-text">BuyBox Monitor</div>
+        <div class="logo-sub">super10count · amazon · multiply</div>
+      </div>
     </div>
-  </div>
-  <div class="header-right">
-    <div class="last-update" id="lastUpdate">Chargement…</div>
-    <button class="refresh-btn" onclick="chargerDonnees()">↻ Actualiser</button>
+    <div class="header-right">
+      <div class="live-dot"></div>
+      <div class="last-update" id="lastUpdate">Chargement…</div>
+      <button class="refresh-btn" onclick="chargerDonnees()">↻ Refresh</button>
+    </div>
   </div>
 </header>
-<main>
+
+<div class="container">
+
   <div id="loadingView" class="loading">
     <div class="loading-ring"></div>
-    <div class="loading-text">Connexion au Google Sheet…</div>
+    <div class="loading-text" id="loadingMsg">Chargement des données…</div>
   </div>
+
   <div id="errorView" style="display:none">
     <div class="error-box">
-      <h3>Impossible de charger les données</h3>
-      <p>Vérifie que le Sheet est public : <strong>Partager → Tout le monde avec le lien → Lecteur</strong></p>
-      <p style="margin-top:12px"><a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4/gviz/tq?tqx=out:json" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:12px">→ Tester l'URL de données</a></p>
+      <h3>Erreur de chargement</h3>
+      <p>Vérifie que les deux Sheets sont publics.<br>
+      <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4/gviz/tq?tqx=out:json" target="_blank" style="color:var(--c1)">→ Tester Sheet BuyBox</a></p>
     </div>
   </div>
+
   <div id="dashboard" style="display:none">
-    <div class="section-label">Vue d'ensemble — données en temps réel</div>
-    <div class="kpi-grid">
-      <div class="kpi-card win"><div class="kpi-label">Taux BuyBox</div><div class="kpi-value" id="kpiTaux">—</div><div class="kpi-sub" id="kpiTauxSub">—</div></div>
-      <div class="kpi-card info"><div class="kpi-label">SKUs où on gagne</div><div class="kpi-value" id="kpiGagnes">—</div><div class="kpi-sub" id="kpiGagnesSub">—</div></div>
-      <div class="kpi-card warn"><div class="kpi-label">SKUs perdus &gt;10%</div><div class="kpi-value" id="kpiPerdus">—</div><div class="kpi-sub" id="kpiPerdusSub">—</div></div>
-      <div class="kpi-card danger"><div class="kpi-label">Concurrent #1</div><div class="kpi-value" id="kpiConcurrent" style="font-size:18px;padding-top:4px">—</div><div class="kpi-sub" id="kpiConcurrentSub">—</div></div>
+
+    <!-- BRAND FILTER -->
+    <div class="brand-bar">
+      <span class="brand-label">Marque :</span>
+      <div id="brandBtns"></div>
     </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card c1">
+        <div class="kpi-label">Taux BuyBox</div>
+        <div class="kpi-value" id="kpiTaux">—</div>
+        <div class="kpi-sub" id="kpiTauxSub">—</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card c2">
+        <div class="kpi-label">SKUs gagnés</div>
+        <div class="kpi-value" id="kpiGagnes">—</div>
+        <div class="kpi-sub" id="kpiGagnesSub">—</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card c3">
+        <div class="kpi-label">SKUs perdus &gt;10%</div>
+        <div class="kpi-value" id="kpiPerdus">—</div>
+        <div class="kpi-sub" id="kpiPerdusSub">—</div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-card c4">
+        <div class="kpi-label">Concurrent #1</div>
+        <div class="kpi-value" id="kpiConcurrent">—</div>
+        <div class="kpi-sub" id="kpiConcurrentSub">—</div>
+        <div class="kpi-glow"></div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
     <div class="charts-row">
-      <div class="chart-card">
-        <div class="chart-title">Taux BuyBox par créneau horaire</div>
+      <div class="card">
+        <div class="card-title">// Taux BuyBox par créneau horaire</div>
         <div class="chart-wrap"><canvas id="chartHoraire"></canvas></div>
       </div>
-      <div class="chart-card" style="overflow-y:auto;max-height:320px;">
-        <div class="chart-title">Concurrents — % BuyBox &amp; évolution</div>
+      <div class="card" style="overflow-y:auto;max-height:300px;">
+        <div class="card-title">// Concurrents — % BuyBox &amp; évolution</div>
         <div id="tableConcurrents"></div>
       </div>
     </div>
-    <div class="heatmap-section">
-      <div class="section-label">Heatmap BuyBox — taux par heure (vert = on gagne)</div>
+
+    <!-- HEATMAP -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-title">// Heatmap BuyBox — 7 derniers jours × créneaux (vert = on gagne)</div>
       <div id="heatmapGrid" class="heatmap-grid"></div>
     </div>
-    <div class="table-section">
-      <div class="table-header">
+
+    <!-- TABLE SKU -->
+    <div class="card">
+      <div class="table-controls">
         <div>
-          <div class="section-label" style="margin-bottom:8px">Dernier snapshot — tous les SKUs</div>
+          <div class="section-label" style="margin-bottom:8px">// Dernier snapshot SKUs</div>
           <div class="filter-tabs">
             <button class="tab active" onclick="filtrer('tous',this)">Tous</button>
-            <button class="tab" onclick="filtrer('gagnes',this)">On gagne ✓</button>
-            <button class="tab" onclick="filtrer('perdus',this)">On perd ✗</button>
+            <button class="tab" onclick="filtrer('gagnes',this)">On gagne</button>
+            <button class="tab" onclick="filtrer('perdus',this)">On perd</button>
             <button class="tab" onclick="filtrer('amazon',this)">Amazon.fr</button>
             <button class="tab" onclick="filtrer('fort-ecart',this)">Écart &gt;20%</button>
           </div>
         </div>
-        <input class="search-box" type="text" placeholder="Chercher SKU…" oninput="rechercherSKU(this.value)">
+        <input class="search-box" type="text" placeholder="SKU / concurrent…" oninput="rechercherSKU(this.value)">
       </div>
-      <table>
+      <table class="sku-table">
         <thead><tr>
           <th onclick="trierPar('sku')">SKU ↕</th>
+          <th onclick="trierPar('marque')">Marque ↕</th>
           <th onclick="trierPar('gagnant')">Gagnant BuyBox ↕</th>
-          <th onclick="trierPar('prixBB')">Prix BuyBox ↕</th>
+          <th onclick="trierPar('prixBB')">Prix BB ↕</th>
           <th onclick="trierPar('prixClient')">Notre prix ↕</th>
           <th onclick="trierPar('ecartPct')">Écart % ↕</th>
           <th>Statut</th>
@@ -169,75 +266,127 @@
       </table>
       <div class="pagination" id="pagination"></div>
     </div>
+
   </div>
-</main>
+</div>
+
 <footer>
-  <div class="footer-text">BuyBox Monitor · Super10count · Multiply via Google Sheets</div>
-  <a class="footer-link footer-text" href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4" target="_blank">Ouvrir le Sheet ↗</a>
+  BuyBox Monitor · Super10count · <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4" target="_blank">Sheet BuyBox ↗</a>
 </footer>
+
 <script>
-const SHEET_ID='1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4';
-const SHEET_NAME='Données brutes';
-let allData=[],filteredData=[],currentFilter='tous',currentSearch='',sortCol='ecartPct',sortDir=-1,currentPage=1;
-const PAGE_SIZE=30;let charts={};
+const SHEET_BB   = '1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4';
+const SHEET_CAT  = '1ggZJ0qKnklWPuKd1Cs1HuouXF8TjyF8sGBz1H4rizyE';
+const SHEET_NAME = 'Données brutes';
+
+let allData=[], filteredData=[], skuMarque={};
+let currentFilter='tous', currentSearch='', currentBrand='Toutes';
+let sortCol='ecartPct', sortDir=-1, currentPage=1;
+const PAGE_SIZE=30;
+let charts={};
 
 function isExclu(g){const s=(g||'').toLowerCase();return s.includes('seconde main')||s.includes('warehouse')||s.includes('renewed');}
 
-async function chargerDonnees(){
-  document.getElementById('loadingView').style.display='flex';
-  document.getElementById('dashboard').style.display='none';
-  document.getElementById('errorView').style.display='none';
+function setLoading(msg){document.getElementById('loadingMsg').textContent=msg||'Chargement…';}
+
+async function fetchSheet(id, sheetName){
   const urls=[
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&headers=1`,
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1`,
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&headers=1`,
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&headers=1`
   ];
-  let lastError=null;
   for(const url of urls){
     try{
       const res=await fetch(url,{cache:'no-store'});
       if(!res.ok)continue;
       const text=await res.text();
-      if(url.includes('export?format=csv')){allData=parseCSV(text);if(allData.length>0)break;continue;}
       let jsonStr=text;
       const m1=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
       if(m1)jsonStr=m1[1];
       else{const m2=text.match(/\/\*O_o\*\/\s*[\w.]+\s*\(([\s\S]*)\)/);if(m2)jsonStr=m2[1];}
       const json=JSON.parse(jsonStr);
-      if(!json?.table?.rows?.length)continue;
-      allData=json.table.rows.map(row=>{
-        const v=row.c;
-        const getStr=(i)=>v[i]?.f!=null?String(v[i].f):(v[i]?.v!=null?String(v[i].v):'');
-        const getNum=(i)=>parseFloat(v[i]?.v)||0;
-        const horodatage=getStr(0);
-        const date=getStr(1);
-        let heure=getStr(2);
-        if(heure.includes('AM')||heure.includes('PM')){const d=new Date('1970-01-01 '+heure);heure=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
-        if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
-        return{horodatage,date,heure,sku:getStr(3),gagnant:getStr(4),prixBB:getNum(5),prixClient:getNum(6),ecartEur:getNum(7),ecartPct:getNum(8),estGagnant:getStr(9).toUpperCase()==='OUI'};
-      }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
-      if(allData.length>0)break;
-    }catch(e){lastError=e;console.warn('URL échouée:',url,e.message);}
+      if(json?.table?.rows?.length)return json.table;
+    }catch(e){console.warn(url,e.message);}
   }
-  if(!allData.length){document.getElementById('loadingView').style.display='none';document.getElementById('errorView').style.display='block';return;}
+  return null;
+}
+
+async function chargerDonnees(){
+  document.getElementById('loadingView').style.display='flex';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('errorView').style.display='none';
+
+  // 1. Charger le catalogue pour la colonne J (marque)
+  setLoading('Chargement du catalogue…');
+  const catTable = await fetchSheet(SHEET_CAT, 'Sheet1');
+  if(catTable){
+    skuMarque={};
+    catTable.rows.forEach(row=>{
+      const v=row.c;
+      const getStr=(i)=>v[i]?.f!=null?String(v[i].f):(v[i]?.v!=null?String(v[i].v):'');
+      // SKU = colonne A (index 0), Marque = colonne J (index 9)
+      const sku=getStr(0).trim();
+      const marque=getStr(9).trim();
+      if(sku&&marque)skuMarque[sku]=marque;
+    });
+  }
+
+  // 2. Charger les données BuyBox
+  setLoading('Chargement des données BuyBox…');
+  const bbTable = await fetchSheet(SHEET_BB, SHEET_NAME);
+  if(!bbTable||!bbTable.rows.length){
+    document.getElementById('loadingView').style.display='none';
+    document.getElementById('errorView').style.display='block';
+    return;
+  }
+
+  allData=bbTable.rows.map(row=>{
+    const v=row.c;
+    const getStr=(i)=>v[i]?.f!=null?String(v[i].f):(v[i]?.v!=null?String(v[i].v):'');
+    const getNum=(i)=>parseFloat(v[i]?.v)||0;
+    const horodatage=getStr(0);
+    const date=getStr(1);
+    let heure=getStr(2);
+    if(heure.includes('AM')||heure.includes('PM')){const d=new Date('1970-01-01 '+heure);heure=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+    if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
+    const sku=getStr(3);
+    const marque=skuMarque[sku]||skuMarque[sku.replace(/^0+/,'')]||'—';
+    return{horodatage,date,heure,sku,marque,gagnant:getStr(4),prixBB:getNum(5),prixClient:getNum(6),ecartEur:getNum(7),ecartPct:getNum(8),estGagnant:getStr(9).toUpperCase()==='OUI'};
+  }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
+
   document.getElementById('loadingView').style.display='none';
   document.getElementById('dashboard').style.display='block';
   document.getElementById('lastUpdate').textContent='Mis à jour '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  rendreBrandFilter();
+  rendreKPIs();
+  rendreCharts();
+  rendreHeatmap();
+  appliquerFiltre();
+}
+
+function rendreBrandFilter(){
+  const marques=['Toutes',...[...new Set(allData.map(r=>r.marque).filter(m=>m&&m!=='—'))].sort()];
+  const container=document.getElementById('brandBtns');
+  container.style.display='flex';container.style.flexWrap='wrap';container.style.gap='6px';
+  container.innerHTML=marques.map(m=>`<button class="brand-btn${m===currentBrand?' active':''}" onclick="setBrand('${m.replace(/'/g,"\\'")}')">${m}</button>`).join('');
+}
+
+function setBrand(m){
+  currentBrand=m;
+  document.querySelectorAll('.brand-btn').forEach(b=>b.classList.toggle('active',b.textContent===m));
   rendreKPIs();rendreCharts();rendreHeatmap();appliquerFiltre();
 }
 
-function parseCSV(text){
-  const lines=text.trim().split('\n');if(lines.length<2)return[];
-  return lines.slice(1).map(line=>{const cols=line.split(',').map(c=>c.replace(/^"|"$/g,'').trim());
-    return{horodatage:cols[0]||'',date:cols[1]||'',heure:cols[2]||'',sku:cols[3]||'',gagnant:cols[4]||'',prixBB:parseFloat(cols[5])||0,prixClient:parseFloat(cols[6])||0,ecartEur:parseFloat(cols[7])||0,ecartPct:parseFloat(cols[8])||0,estGagnant:(cols[9]||'').toUpperCase()==='OUI'};
-  }).filter(r=>r.sku&&r.sku!=='SKU');
+function filtreMarque(data){
+  if(currentBrand==='Toutes')return data;
+  return data.filter(r=>r.marque===currentBrand);
 }
 
 function dernierSnapshot(){
   if(!allData.length)return[];
   const hs=[...new Set(allData.map(r=>r.horodatage))].sort();
   const dernier=hs[hs.length-1];
-  return allData.filter(r=>r.horodatage===dernier&&!isExclu(r.gagnant));
+  return filtreMarque(allData.filter(r=>r.horodatage===dernier&&!isExclu(r.gagnant)));
 }
 
 function rendreKPIs(){
@@ -250,29 +399,51 @@ function rendreKPIs(){
   snap.filter(r=>!r.estGagnant&&!isExclu(r.gagnant)).forEach(r=>{comptage[r.gagnant]=(comptage[r.gagnant]||0)+1;});
   const top=Object.entries(comptage).sort((a,b)=>b[1]-a[1])[0];
   document.getElementById('kpiTaux').textContent=taux+'%';
-  document.getElementById('kpiTauxSub').textContent=total+' SKUs sur le dernier snapshot';
+  document.getElementById('kpiTauxSub').textContent=total+' SKUs analysés';
   document.getElementById('kpiGagnes').textContent=gagnesUniq;
   document.getElementById('kpiGagnesSub').textContent='sur '+total+' SKUs actifs';
   document.getElementById('kpiPerdus').textContent=perdus;
-  document.getElementById('kpiPerdusSub').textContent='SKUs avec écart > 10%';
-  document.getElementById('kpiConcurrent').textContent=top?top[0].replace('Amazon.fr','Amazon'):'—';
-  document.getElementById('kpiConcurrentSub').textContent=top?top[1]+' BuyBox remportées':'';
+  document.getElementById('kpiPerdusSub').textContent='opportunités de repricing';
+  document.getElementById('kpiConcurrent').textContent=top?top[0].slice(0,18):'—';
+  document.getElementById('kpiConcurrentSub').textContent=top?top[1]+' BuyBox':'';
 }
 
 function rendreCharts(){
-  const heures=['10:00','12:00','14:00','16:00','18:00','20:00'];
+  const heures=['10','12','14','16','18','20'];
+  const base=filtreMarque(allData.filter(r=>!isExclu(r.gagnant)));
   const tauxParHeure=heures.map(h=>{
-    const lignes=allData.filter(r=>!isExclu(r.gagnant)&&r.heure&&r.heure.startsWith(h.split(':')[0]));
+    const lignes=base.filter(r=>r.heure&&r.heure.startsWith(h));
     if(!lignes.length)return null;
     const skusU=new Set(lignes.map(r=>r.sku)).size;
     const skusG=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
     return skusU>0?Math.round(skusG/skusU*100):0;
   });
+
+  // Échelle adaptative : max des valeurs + 15%, minimum 10
+  const valeurs=tauxParHeure.filter(v=>v!==null);
+  const maxVal=valeurs.length?Math.max(...valeurs):100;
+  const yMax=Math.min(100,Math.max(10,Math.ceil((maxVal*1.2)/5)*5));
+
   if(charts.horaire)charts.horaire.destroy();
   charts.horaire=new Chart(document.getElementById('chartHoraire'),{
     type:'bar',
-    data:{labels:heures,datasets:[{label:'Taux BuyBox %',data:tauxParHeure,backgroundColor:tauxParHeure.map(v=>v===null?'rgba(255,255,255,0.05)':v>=50?'rgba(0,229,160,0.7)':v>=30?'rgba(255,209,102,0.7)':'rgba(255,107,107,0.7)'),borderRadius:6,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{color:'#6b6b88',font:{family:'DM Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#6b6b88',font:{family:'DM Mono',size:11}},grid:{display:false}}}}
+    data:{
+      labels:heures.map(h=>h+'h'),
+      datasets:[{
+        label:'Taux BuyBox %',
+        data:tauxParHeure,
+        backgroundColor:tauxParHeure.map(v=>v===null?'rgba(255,255,255,0.03)':v>=50?'rgba(0,245,212,0.7)':v>=25?'rgba(247,127,0,0.7)':'rgba(247,37,133,0.7)'),
+        borderRadius:8,borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw!==null?c.raw+'%':'N/A'}}},
+      scales:{
+        y:{min:0,max:yMax,ticks:{color:'#6868aa',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},
+        x:{ticks:{color:'#6868aa',font:{family:'Share Tech Mono',size:11}},grid:{display:false},border:{display:false}}
+      }
+    }
   });
   rendreConcurrents();
 }
@@ -281,8 +452,8 @@ function rendreConcurrents(){
   const snaps=[...new Set(allData.map(r=>r.horodatage))].sort();
   const dernH=snaps[snaps.length-1];
   const avantH=snaps.length>1?snaps[snaps.length-2]:null;
-  const snapD=allData.filter(r=>r.horodatage===dernH&&!isExclu(r.gagnant));
-  const snapA=avantH?allData.filter(r=>r.horodatage===avantH&&!isExclu(r.gagnant)):[];
+  const snapD=filtreMarque(allData.filter(r=>r.horodatage===dernH&&!isExclu(r.gagnant)));
+  const snapA=avantH?filtreMarque(allData.filter(r=>r.horodatage===avantH&&!isExclu(r.gagnant))):[];
   const totalD=new Set(snapD.map(r=>r.sku)).size;
   const totalA=new Set(snapA.map(r=>r.sku)).size||totalD;
   const cD={};snapD.filter(r=>!r.estGagnant).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
@@ -291,41 +462,39 @@ function rendreConcurrents(){
   cA['Super10count']=snapA.filter(r=>r.estGagnant).length;
   const top=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,12);
   const maxVal=top[0]?.[1]||1;
-  const couleurs={'Super10count':'#00e5a0','Amazon.fr':'#ffd166'};
-  const palette=['#74b9ff','#ff6b6b','#a29bfe','#fd79a8','#00cec9','#e17055','#6c5ce7','#fdcb6e','#55efc4','#fab1a0'];
-  let ci=0;
-  const getColor=(n)=>{if(!couleurs[n])couleurs[n]=palette[ci++%palette.length];return couleurs[n];};
+  const palette={'Super10count':'#00f5d4','Amazon.fr':'#f77f00'};
+  const pal=['#4cc9f0','#f72585','#a8ff3e','#8338ec','#ff006e','#7209b7','#3a86ff','#fb5607','#ffbe0b','#06d6a0'];
+  let ci=0;const gc=(n)=>{if(!palette[n])palette[n]=pal[ci++%pal.length];return palette[n];};
   const rows=top.map(([nom,nb])=>{
     const pct=totalD>0?(nb/totalD*100):0;
     const nbP=cA[nom]||0;const pctP=totalA>0?(nbP/totalA*100):0;
     const delta=pct-pctP;
     const evo=avantH?(Math.abs(delta)<0.5?'<span class="evo-flat">—</span>':delta>0?`<span class="evo-up">▲ +${delta.toFixed(1)}%</span>`:`<span class="evo-down">▼ ${delta.toFixed(1)}%</span>`):'<span class="evo-flat">—</span>';
-    const barPct=Math.round(nb/maxVal*100);
-    const color=getColor(nom);
-    const nomH=nom==='Super10count'?'<strong style="color:var(--accent)">Super10count</strong>':(nom.length>22?nom.slice(0,20)+'…':nom);
-    return `<tr><td>${nomH}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${barPct}%;background:${color}"></div></div><span style="color:${color};min-width:36px;text-align:right">${pct.toFixed(1)}%</span></div></td><td style="text-align:right">${nb}</td><td style="text-align:right">${evo}</td></tr>`;
+    const barPct=Math.round(nb/maxVal*100);const color=gc(nom);
+    const nomH=nom==='Super10count'?`<strong style="color:#00f5d4">Super10count</strong>`:(nom.length>20?nom.slice(0,18)+'…':nom);
+    return `<tr><td>${nomH}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${barPct}%;background:${color}"></div></div><span style="color:${color};min-width:38px;text-align:right;font-size:11px">${pct.toFixed(1)}%</span></div></td><td style="text-align:right">${nb}</td><td style="text-align:right">${evo}</td></tr>`;
   }).join('');
-  document.getElementById('tableConcurrents').innerHTML=`<table class="conc-table"><thead><tr><th>Concurrent</th><th>% BuyBox</th><th style="text-align:right">SKUs</th><th style="text-align:right">Évolution</th></tr></thead><tbody>${rows}</tbody></table>${avantH?`<div style="font-size:10px;color:var(--muted);padding:8px 12px;font-family:'DM Mono',monospace">vs snapshot précédent : ${avantH}</div>`:''}`;
+  document.getElementById('tableConcurrents').innerHTML=`<table class="conc-table"><thead><tr><th>Concurrent</th><th>% BuyBox</th><th style="text-align:right">SKUs</th><th style="text-align:right">Évol.</th></tr></thead><tbody>${rows}</tbody></table>${avantH?`<div style="font-size:9px;color:var(--muted);padding:6px 10px">vs ${avantH}</div>`:''}`;
 }
 
 function rendreHeatmap(){
-  const heures=['10:00','12:00','14:00','16:00','18:00','20:00'];
-  const dates=[...new Set(allData.map(r=>r.date))].filter(Boolean).sort().slice(-7);
+  const heures=['10','12','14','16','18','20'];
+  const base=filtreMarque(allData);
+  const dates=[...new Set(base.map(r=>r.date))].filter(Boolean).sort().slice(-7);
   const grid=document.getElementById('heatmapGrid');
-  grid.innerHTML='';grid.style.gridTemplateColumns=`100px repeat(${heures.length},1fr)`;
+  grid.innerHTML='';grid.style.gridTemplateColumns=`90px repeat(${heures.length},1fr)`;
   grid.innerHTML+='<div class="hm-header"></div>';
-  heures.forEach(h=>{grid.innerHTML+=`<div class="hm-header">${h}</div>`;});
+  heures.forEach(h=>{grid.innerHTML+=`<div class="hm-header">${h}h00</div>`;});
   dates.forEach(date=>{
     grid.innerHTML+=`<div class="hm-row-label">${date}</div>`;
     heures.forEach(h=>{
-      const hNum=h.split(':')[0];
-      const lignes=allData.filter(r=>r.date===date&&r.heure&&r.heure.startsWith(hNum));
-      if(!lignes.length){grid.innerHTML+=`<div class="hm-cell" style="background:rgba(255,255,255,0.03);color:#3a3a55">—</div>`;return;}
+      const lignes=base.filter(r=>r.date===date&&r.heure&&r.heure.startsWith(h));
+      if(!lignes.length){grid.innerHTML+=`<div class="hm-cell" style="background:rgba(255,255,255,0.02);color:#2a2a55">—</div>`;return;}
       const skusU=new Set(lignes.map(r=>r.sku)).size;
       const skusG=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
       const taux=Math.round(skusG/skusU*100);
-      const bg=taux>=50?`rgba(0,229,160,${0.1+taux/100*0.5})`:taux>=25?`rgba(255,209,102,${0.1+taux/100*0.4})`:`rgba(255,107,107,0.15)`;
-      const color=taux>=50?'#00e5a0':taux>=25?'#ffd166':'#ff6b6b';
+      const bg=taux>=50?`rgba(0,245,212,${0.08+taux/100*0.5})`:taux>=25?`rgba(247,127,0,${0.08+taux/100*0.4})`:`rgba(247,37,133,0.12)`;
+      const color=taux>=50?'#00f5d4':taux>=25?'#f77f00':'#f72585';
       grid.innerHTML+=`<div class="hm-cell" style="background:${bg};color:${color}">${taux}%</div>`;
     });
   });
@@ -337,7 +506,7 @@ function appliquerFiltre(){
   else if(currentFilter==='perdus')data=data.filter(r=>!r.estGagnant);
   else if(currentFilter==='amazon')data=data.filter(r=>r.gagnant.toLowerCase().includes('amazon.fr')&&!r.gagnant.toLowerCase().includes('seconde'));
   else if(currentFilter==='fort-ecart')data=data.filter(r=>r.ecartPct>20&&!r.estGagnant);
-  if(currentSearch)data=data.filter(r=>r.sku.toLowerCase().includes(currentSearch.toLowerCase())||r.gagnant.toLowerCase().includes(currentSearch.toLowerCase()));
+  if(currentSearch)data=data.filter(r=>r.sku.toLowerCase().includes(currentSearch.toLowerCase())||r.gagnant.toLowerCase().includes(currentSearch.toLowerCase())||r.marque.toLowerCase().includes(currentSearch.toLowerCase()));
   data.sort((a,b)=>{let va=a[sortCol],vb=b[sortCol];if(typeof va==='string')return sortDir*va.localeCompare(vb);return sortDir*(va-vb);});
   filteredData=data;currentPage=1;rendrePage();
 }
@@ -347,9 +516,10 @@ function rendrePage(){
   const page=filteredData.slice(start,start+PAGE_SIZE);
   const tbody=document.getElementById('tableBody');
   tbody.innerHTML=page.map(r=>{
-    const ecartCls=r.ecartPct>20?'ecart-positive':r.ecartPct<0?'ecart-negative':'ecart-neutre';
-    const statut=r.estGagnant?'<span class="badge badge-win">ON GAGNE</span>':r.gagnant.toLowerCase().includes('amazon')?`<span class="badge badge-amazon">${r.gagnant.length>18?r.gagnant.slice(0,16)+'…':r.gagnant}</span>`:`<span class="badge badge-lose">${r.gagnant.length>18?r.gagnant.slice(0,16)+'…':r.gagnant}</span>`;
-    return `<tr><td>${r.sku}</td><td style="color:var(--muted);font-size:12px">${r.gagnant.length>24?r.gagnant.slice(0,22)+'…':r.gagnant}</td><td>${r.prixBB>0?r.prixBB.toFixed(2)+' €':'—'}</td><td>${r.prixClient>0?r.prixClient.toFixed(2)+' €':'—'}</td><td class="${ecartCls}">${r.ecartPct>0?'+':''}${r.ecartPct.toFixed(1)}%</td><td>${statut}</td></tr>`;
+    const ecartCls=r.ecartPct>20?'ecart-pos':r.ecartPct<0?'ecart-neg':'ecart-neu';
+    const statut=r.estGagnant?'<span class="badge badge-win">ON GAGNE</span>':r.gagnant.toLowerCase().includes('amazon.fr')?`<span class="badge badge-amazon">${r.gagnant.length>16?r.gagnant.slice(0,14)+'…':r.gagnant}</span>`:`<span class="badge badge-lose">${r.gagnant.length>16?r.gagnant.slice(0,14)+'…':r.gagnant}</span>`;
+    const marqueTag=r.marque&&r.marque!=='—'?`<span class="brand-tag">${r.marque}</span>`:'<span style="color:var(--muted)">—</span>';
+    return `<tr><td>${r.sku}</td><td>${marqueTag}</td><td style="color:var(--muted);font-size:11px">${r.gagnant.length>22?r.gagnant.slice(0,20)+'…':r.gagnant}</td><td>${r.prixBB>0?r.prixBB.toFixed(2)+' €':'—'}</td><td>${r.prixClient>0?r.prixClient.toFixed(2)+' €':'—'}</td><td class="${ecartCls}">${r.ecartPct>0?'+':''}${r.ecartPct.toFixed(1)}%</td><td>${statut}</td></tr>`;
   }).join('');
   const totalPages=Math.ceil(filteredData.length/PAGE_SIZE);
   const pag=document.getElementById('pagination');
