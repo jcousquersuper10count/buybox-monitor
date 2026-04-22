@@ -8,42 +8,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #0a0a0f;
-    --bg2: #12121a;
-    --bg3: #1a1a26;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #f0f0f8;
-    --muted: #6b6b88;
-    --accent: #00e5a0;
-    --accent2: #ff6b6b;
-    --accent3: #ffd166;
-    --accent4: #74b9ff;
-    --win: #00e5a0;
-    --lose: #ff6b6b;
+    --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a26;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #f0f0f8; --muted: #6b6b88;
+    --accent: #00e5a0; --accent2: #ff6b6b; --accent3: #ffd166; --accent4: #74b9ff;
+    --win: #00e5a0; --lose: #ff6b6b;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-  .mono { font-family: 'DM Mono', monospace; }
-
-  /* HEADER */
-  header {
-    padding: 2rem 2.5rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: rgba(10,10,15,0.95);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-  }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  header { padding: 2rem 2.5rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(10,10,15,0.95); backdrop-filter: blur(12px); z-index: 100; }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
@@ -51,71 +24,19 @@
   .logo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
   .header-right { display: flex; align-items: center; gap: 16px; }
   .last-update { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .refresh-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    padding: 7px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.03em;
-  }
-  .refresh-btn:hover { background: var(--bg2); border-color: var(--accent); color: var(--accent); }
-
-  /* LAYOUT */
+  .refresh-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 7px 14px; border-radius: 6px; font-size: 12px; font-family: 'Syne', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
   main { padding: 2rem 2.5rem; max-width: 1400px; margin: 0 auto; }
-
-  /* LOADING */
-  .loading {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 60vh; gap: 20px;
-  }
-  .loading-ring {
-    width: 48px; height: 48px; border-radius: 50%;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    animation: spin 0.8s linear infinite;
-  }
+  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 20px; }
+  .loading-ring { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border2); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted); }
-
-  /* ERROR */
-  .error-box {
-    background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2);
-    border-radius: 10px; padding: 2rem; margin: 2rem 0; text-align: center;
-  }
+  .error-box { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); border-radius: 10px; padding: 2rem; margin: 2rem 0; text-align: center; }
   .error-box h3 { color: var(--accent2); margin-bottom: 8px; }
   .error-box p { color: var(--muted); font-size: 14px; line-height: 1.6; }
-  .error-box code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--bg3); padding: 2px 6px; border-radius: 4px; }
-
-  /* SECTION */
-  .section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  /* KPI GRID */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-  .kpi-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    transition: border-color 0.2s;
-  }
+  .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+  .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; transition: border-color 0.2s; }
   .kpi-card:hover { border-color: var(--border2); }
   .kpi-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
   .kpi-value { font-size: 32px; font-weight: 800; line-height: 1; }
@@ -124,124 +45,56 @@
   .kpi-card.warn .kpi-value { color: var(--accent3); }
   .kpi-card.danger .kpi-value { color: var(--lose); }
   .kpi-card.info .kpi-value { color: var(--accent4); }
-
-  /* CHARTS ROW */
-  .charts-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-  .chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-  }
-  .chart-title {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 1.25rem;
-    letter-spacing: 0.02em;
-  }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .chart-title { font-size: 13px; font-weight: 700; margin-bottom: 1.25rem; letter-spacing: 0.02em; }
   .chart-wrap { position: relative; height: 220px; }
-
-  /* TABLE SECTION */
   .table-section { margin-bottom: 2.5rem; }
-  .table-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1rem;
-  }
+  .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .filter-tabs { display: flex; gap: 6px; }
-  .tab {
-    background: var(--bg2); border: 1px solid var(--border);
-    color: var(--muted); padding: 5px 12px; border-radius: 6px;
-    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
-  }
+  .tab { background: var(--bg2); border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
   .tab.active { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
-  .search-box {
-    background: var(--bg2); border: 1px solid var(--border);
-    color: var(--text); padding: 7px 12px; border-radius: 6px;
-    font-size: 13px; font-family: 'DM Mono', monospace; width: 200px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .search-box:focus { border-color: var(--border2); }
+  .search-box { background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; font-size: 13px; font-family: 'DM Mono', monospace; width: 200px; outline: none; }
   .search-box::placeholder { color: var(--muted); }
   table { width: 100%; border-collapse: collapse; }
-  thead th {
-    font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--muted); padding: 10px 14px;
-    text-align: left; border-bottom: 1px solid var(--border);
-    cursor: pointer; user-select: none;
-  }
+  thead th { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); cursor: pointer; }
   thead th:hover { color: var(--text); }
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
   tbody tr:hover { background: var(--bg3); }
-  tbody td {
-    padding: 11px 14px; font-size: 13px;
-    font-family: 'DM Mono', monospace;
-  }
-  .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
-  }
+  tbody td { padding: 11px 14px; font-size: 13px; font-family: 'DM Mono', monospace; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
   .badge-win { background: rgba(0,229,160,0.12); color: var(--win); }
   .badge-lose { background: rgba(255,107,107,0.12); color: var(--lose); }
   .badge-amazon { background: rgba(255,209,102,0.12); color: var(--accent3); }
   .ecart-positive { color: var(--lose); }
   .ecart-negative { color: var(--win); font-size: 11px; }
   .ecart-neutre { color: var(--muted); }
-
-  /* HOURLY HEATMAP */
   .heatmap-section { margin-bottom: 2.5rem; }
-  .heatmap-grid {
-    display: grid;
-    grid-template-columns: 80px repeat(6, 1fr);
-    gap: 3px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-  }
+  .heatmap-grid { display: grid; grid-template-columns: 80px repeat(6, 1fr); gap: 3px; font-family: 'DM Mono', monospace; font-size: 11px; }
   .hm-header { color: var(--muted); text-align: center; padding: 6px 4px; }
-  .hm-row-label { color: var(--muted); padding: 6px 4px; display: flex; align-items: center; }
-  .hm-cell {
-    border-radius: 4px; padding: 8px 4px; text-align: center;
-    font-weight: 500; font-size: 12px; min-height: 36px;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* PAGINATION */
+  .hm-row-label { color: var(--muted); padding: 6px 4px; display: flex; align-items: center; font-size: 11px; }
+  .hm-cell { border-radius: 4px; padding: 8px 4px; text-align: center; font-weight: 500; font-size: 12px; min-height: 36px; display: flex; align-items: center; justify-content: center; }
+  .conc-table { width: 100%; border-collapse: collapse; }
+  .conc-table th { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .conc-table td { padding: 9px 12px; font-size: 12px; font-family: 'DM Mono', monospace; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+  .conc-table tr:hover td { background: var(--bg3); }
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar-bg { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; min-width: 60px; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .evo-up { color: var(--lose); font-size: 11px; font-weight: 600; }
+  .evo-down { color: var(--win); font-size: 11px; font-weight: 600; }
+  .evo-flat { color: var(--muted); font-size: 11px; }
   .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1.5rem; }
-  .page-btn {
-    background: var(--bg2); border: 1px solid var(--border);
-    color: var(--muted); width: 32px; height: 32px; border-radius: 6px;
-    font-size: 12px; cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .page-btn { background: var(--bg2); border: 1px solid var(--border); color: var(--muted); width: 32px; height: 32px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
   .page-btn:hover, .page-btn.active { border-color: var(--accent); color: var(--accent); }
   .page-info { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 1.5rem 2.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 2rem;
-  }
+  footer { border-top: 1px solid var(--border); padding: 1.5rem 2.5rem; display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; }
   .footer-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
   .footer-link { color: var(--accent); text-decoration: none; }
-
-  @media (max-width: 900px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .charts-row { grid-template-columns: 1fr; }
-    main { padding: 1.5rem; }
-  }
+  @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .charts-row { grid-template-columns: 1fr; } main { padding: 1.5rem; } }
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <div class="logo-dot"></div>
@@ -255,455 +108,264 @@
     <button class="refresh-btn" onclick="chargerDonnees()">↻ Actualiser</button>
   </div>
 </header>
-
 <main>
   <div id="loadingView" class="loading">
     <div class="loading-ring"></div>
     <div class="loading-text">Connexion au Google Sheet…</div>
   </div>
-
   <div id="errorView" style="display:none">
     <div class="error-box">
       <h3>Impossible de charger les données</h3>
-      <p>Le Google Sheet n'est pas accessible publiquement.<br>
-      Dans ton Sheet : <strong>Partager</strong> → <strong>Tout le monde avec le lien</strong> → Lecteur</p>
-      <p style="margin-top:12px">Teste manuellement : <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4/gviz/tq?tqx=out:json" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:12px">→ Ouvrir l'URL de données</a><br><span style="font-size:11px;color:var(--muted)">Si ce lien demande une connexion Google, le Sheet n'est pas encore vraiment public.</span></p>
+      <p>Vérifie que le Sheet est public : <strong>Partager → Tout le monde avec le lien → Lecteur</strong></p>
+      <p style="margin-top:12px"><a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4/gviz/tq?tqx=out:json" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:12px">→ Tester l'URL de données</a></p>
     </div>
   </div>
-
   <div id="dashboard" style="display:none">
-
-    <!-- KPIs -->
     <div class="section-label">Vue d'ensemble — données en temps réel</div>
     <div class="kpi-grid">
-      <div class="kpi-card win">
-        <div class="kpi-label">Taux BuyBox</div>
-        <div class="kpi-value" id="kpiTaux">—</div>
-        <div class="kpi-sub" id="kpiTauxSub">SKUs analysés aujourd'hui</div>
-      </div>
-      <div class="kpi-card info">
-        <div class="kpi-label">SKUs où on gagne</div>
-        <div class="kpi-value" id="kpiGagnes">—</div>
-        <div class="kpi-sub" id="kpiGagnesSub">sur le dernier snapshot</div>
-      </div>
-      <div class="kpi-card warn">
-        <div class="kpi-label">SKUs perdus</div>
-        <div class="kpi-value" id="kpiPerdus">—</div>
-        <div class="kpi-sub" id="kpiPerdusSub">avec écart &gt; 10%</div>
-      </div>
-      <div class="kpi-card danger">
-        <div class="kpi-label">Concurrent #1</div>
-        <div class="kpi-value" id="kpiConcurrent" style="font-size:18px;padding-top:4px">—</div>
-        <div class="kpi-sub" id="kpiConcurrentSub">le plus souvent gagnant</div>
-      </div>
+      <div class="kpi-card win"><div class="kpi-label">Taux BuyBox</div><div class="kpi-value" id="kpiTaux">—</div><div class="kpi-sub" id="kpiTauxSub">—</div></div>
+      <div class="kpi-card info"><div class="kpi-label">SKUs où on gagne</div><div class="kpi-value" id="kpiGagnes">—</div><div class="kpi-sub" id="kpiGagnesSub">—</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">SKUs perdus &gt;10%</div><div class="kpi-value" id="kpiPerdus">—</div><div class="kpi-sub" id="kpiPerdusSub">—</div></div>
+      <div class="kpi-card danger"><div class="kpi-label">Concurrent #1</div><div class="kpi-value" id="kpiConcurrent" style="font-size:18px;padding-top:4px">—</div><div class="kpi-sub" id="kpiConcurrentSub">—</div></div>
     </div>
-
-    <!-- CHARTS -->
     <div class="charts-row">
       <div class="chart-card">
         <div class="chart-title">Taux BuyBox par créneau horaire</div>
         <div class="chart-wrap"><canvas id="chartHoraire"></canvas></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">Top 8 concurrents</div>
-        <div class="chart-wrap"><canvas id="chartConcurrents"></canvas></div>
+      <div class="chart-card" style="overflow-y:auto;max-height:320px;">
+        <div class="chart-title">Concurrents — % BuyBox &amp; évolution</div>
+        <div id="tableConcurrents"></div>
       </div>
     </div>
-
-    <!-- HEATMAP -->
     <div class="heatmap-section">
       <div class="section-label">Heatmap BuyBox — taux par heure (vert = on gagne)</div>
       <div id="heatmapGrid" class="heatmap-grid"></div>
     </div>
-
-    <!-- TABLE -->
     <div class="table-section">
       <div class="table-header">
         <div>
           <div class="section-label" style="margin-bottom:8px">Dernier snapshot — tous les SKUs</div>
           <div class="filter-tabs">
-            <button class="tab active" onclick="filtrer('tous', this)">Tous</button>
-            <button class="tab" onclick="filtrer('gagnes', this)">On gagne ✓</button>
-            <button class="tab" onclick="filtrer('perdus', this)">On perd ✗</button>
-            <button class="tab" onclick="filtrer('amazon', this)">Amazon.fr</button>
-            <button class="tab" onclick="filtrer('fort-ecart', this)">Écart &gt; 20%</button>
+            <button class="tab active" onclick="filtrer('tous',this)">Tous</button>
+            <button class="tab" onclick="filtrer('gagnes',this)">On gagne ✓</button>
+            <button class="tab" onclick="filtrer('perdus',this)">On perd ✗</button>
+            <button class="tab" onclick="filtrer('amazon',this)">Amazon.fr</button>
+            <button class="tab" onclick="filtrer('fort-ecart',this)">Écart &gt;20%</button>
           </div>
         </div>
         <input class="search-box" type="text" placeholder="Chercher SKU…" oninput="rechercherSKU(this.value)">
       </div>
       <table>
-        <thead>
-          <tr>
-            <th onclick="trierPar('sku')">SKU ↕</th>
-            <th onclick="trierPar('gagnant')">Gagnant BuyBox ↕</th>
-            <th onclick="trierPar('prixBB')">Prix BuyBox ↕</th>
-            <th onclick="trierPar('prixClient')">Notre prix ↕</th>
-            <th onclick="trierPar('ecartPct')">Écart % ↕</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th onclick="trierPar('sku')">SKU ↕</th>
+          <th onclick="trierPar('gagnant')">Gagnant BuyBox ↕</th>
+          <th onclick="trierPar('prixBB')">Prix BuyBox ↕</th>
+          <th onclick="trierPar('prixClient')">Notre prix ↕</th>
+          <th onclick="trierPar('ecartPct')">Écart % ↕</th>
+          <th>Statut</th>
+        </tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
       <div class="pagination" id="pagination"></div>
     </div>
-
   </div>
 </main>
-
 <footer>
-  <div class="footer-text">BuyBox Monitor · Super10count · Données Multiply via Google Sheets</div>
+  <div class="footer-text">BuyBox Monitor · Super10count · Multiply via Google Sheets</div>
   <a class="footer-link footer-text" href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4" target="_blank">Ouvrir le Sheet ↗</a>
 </footer>
-
 <script>
-const SHEET_ID = '1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4';
-const SHEET_NAME = 'Données brutes';
+const SHEET_ID='1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4';
+const SHEET_NAME='Données brutes';
+let allData=[],filteredData=[],currentFilter='tous',currentSearch='',sortCol='ecartPct',sortDir=-1,currentPage=1;
+const PAGE_SIZE=30;let charts={};
 
-let allData = [];
-let filteredData = [];
-let currentFilter = 'tous';
-let currentSearch = '';
-let sortCol = 'ecartPct';
-let sortDir = -1;
-let currentPage = 1;
-const PAGE_SIZE = 30;
-let charts = {};
+function isExclu(g){const s=(g||'').toLowerCase();return s.includes('seconde main')||s.includes('warehouse')||s.includes('renewed');}
 
-async function chargerDonnees() {
-  document.getElementById('loadingView').style.display = 'flex';
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('errorView').style.display = 'none';
-
-  // On essaie d'abord avec le nom d'onglet, puis sans (premier onglet par défaut)
-  const urls = [
+async function chargerDonnees(){
+  document.getElementById('loadingView').style.display='flex';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('errorView').style.display='none';
+  const urls=[
     `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&headers=1`,
     `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1`,
     `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`
   ];
-
-  let json = null;
-  let lastError = null;
-
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) continue;
-      const text = await res.text();
-
-      // Format CSV (fallback)
-      if (url.includes('export?format=csv')) {
-        allData = parseCSV(text);
-        if (allData.length > 0) break;
-        continue;
-      }
-
-      // Format JSONP — Google peut envoyer plusieurs variantes
-      let jsonStr = text;
-      // Variante 1 : google.visualization.Query.setResponse(...)
-      const m1 = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
-      if (m1) jsonStr = m1[1];
-      // Variante 2 : /*O_o*/ ... (ancien format)
-      else {
-        const m2 = text.match(/\/\*O_o\*\/\s*[\w.]+\s*\(([\s\S]*)\)/);
-        if (m2) jsonStr = m2[1];
-      }
-
-      json = JSON.parse(jsonStr);
-      if (!json?.table?.rows?.length) continue;
-
-      allData = json.table.rows.map(row => {
-        const v = row.c;
-
-        // Google encode les dates comme "Date(2026,3,21,17,38,0)" — on utilise le champ formaté .f
-        const getStr  = (i) => v[i]?.f != null ? String(v[i].f) : (v[i]?.v != null ? String(v[i].v) : '');
-        const getNum  = (i) => parseFloat(v[i]?.v) || 0;
-
-        // Horodatage : utiliser le formaté "2026-04-21 17:38"
-        const horodatage = getStr(0);
-
-        // Date : extraire depuis le formaté ou depuis Date(yyyy,mm,dd)
-        let date = getStr(1); // "2026-04-21"
-
-        // Heure : Google stocke l'heure comme Date(1899,11,30,HH,MM,0), on prend le formaté
-        let heure = getStr(2); // "17:38" — mais peut être "05:38 PM" selon locale
-        // Normaliser : on veut "HH:MM" en 24h
-        if (heure.includes('AM') || heure.includes('PM')) {
-          const d = new Date('1970-01-01 ' + heure);
-          heure = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-        }
-        // Parfois le formaté est vide, on reparse depuis le v brut : "Date(1899,11,30,17,38,0)"
-        if (!heure && v[2]?.v) {
-          const m = String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);
-          if (m) heure = m[1].padStart(2,'0') + ':' + m[2].padStart(2,'0');
-        }
-
-        // SKU : Google le lit comme nombre (100001.0), on prend le formaté "100001"
-        const sku = getStr(3);
-
-        return {
-          horodatage,
-          date,
-          heure,
-          sku,
-          gagnant:    getStr(4),
-          prixBB:     getNum(5),
-          prixClient: getNum(6),
-          ecartEur:   getNum(7),
-          ecartPct:   getNum(8),
-          estGagnant: getStr(9).toUpperCase() === 'OUI'
-        };
-      }).filter(r => r.sku && r.sku !== 'SKU' && r.sku !== '');
-
-      if (allData.length > 0) break;
-
-    } catch(e) {
-      lastError = e;
-      console.warn('URL échouée:', url, e.message);
-    }
+  let lastError=null;
+  for(const url of urls){
+    try{
+      const res=await fetch(url,{cache:'no-store'});
+      if(!res.ok)continue;
+      const text=await res.text();
+      if(url.includes('export?format=csv')){allData=parseCSV(text);if(allData.length>0)break;continue;}
+      let jsonStr=text;
+      const m1=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
+      if(m1)jsonStr=m1[1];
+      else{const m2=text.match(/\/\*O_o\*\/\s*[\w.]+\s*\(([\s\S]*)\)/);if(m2)jsonStr=m2[1];}
+      const json=JSON.parse(jsonStr);
+      if(!json?.table?.rows?.length)continue;
+      allData=json.table.rows.map(row=>{
+        const v=row.c;
+        const getStr=(i)=>v[i]?.f!=null?String(v[i].f):(v[i]?.v!=null?String(v[i].v):'');
+        const getNum=(i)=>parseFloat(v[i]?.v)||0;
+        const horodatage=getStr(0);
+        const date=getStr(1);
+        let heure=getStr(2);
+        if(heure.includes('AM')||heure.includes('PM')){const d=new Date('1970-01-01 '+heure);heure=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+        if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
+        return{horodatage,date,heure,sku:getStr(3),gagnant:getStr(4),prixBB:getNum(5),prixClient:getNum(6),ecartEur:getNum(7),ecartPct:getNum(8),estGagnant:getStr(9).toUpperCase()==='OUI'};
+      }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
+      if(allData.length>0)break;
+    }catch(e){lastError=e;console.warn('URL échouée:',url,e.message);}
   }
-
-  if (!allData.length) {
-    console.error('Toutes les URLs ont échoué', lastError);
-    document.getElementById('loadingView').style.display = 'none';
-    document.getElementById('errorView').style.display = 'block';
-    return;
-  }
-
-  document.getElementById('loadingView').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('lastUpdate').textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-
-  rendreKPIs();
-  rendreCharts();
-  rendreHeatmap();
-  appliquerFiltre();
+  if(!allData.length){document.getElementById('loadingView').style.display='none';document.getElementById('errorView').style.display='block';return;}
+  document.getElementById('loadingView').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('lastUpdate').textContent='Mis à jour '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  rendreKPIs();rendreCharts();rendreHeatmap();appliquerFiltre();
 }
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  // Ligne 0 = en-têtes, on skip
-  return lines.slice(1).map(line => {
-    const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-    return {
-      horodatage: cols[0] || '',
-      date:       cols[1] || '',
-      heure:      cols[2] || '',
-      sku:        cols[3] || '',
-      gagnant:    cols[4] || '',
-      prixBB:     parseFloat(cols[5]) || 0,
-      prixClient: parseFloat(cols[6]) || 0,
-      ecartEur:   parseFloat(cols[7]) || 0,
-      ecartPct:   parseFloat(cols[8]) || 0,
-      estGagnant: (cols[9] || '').toUpperCase() === 'OUI'
-    };
-  }).filter(r => r.sku && r.sku !== 'SKU');
+function parseCSV(text){
+  const lines=text.trim().split('\n');if(lines.length<2)return[];
+  return lines.slice(1).map(line=>{const cols=line.split(',').map(c=>c.replace(/^"|"$/g,'').trim());
+    return{horodatage:cols[0]||'',date:cols[1]||'',heure:cols[2]||'',sku:cols[3]||'',gagnant:cols[4]||'',prixBB:parseFloat(cols[5])||0,prixClient:parseFloat(cols[6])||0,ecartEur:parseFloat(cols[7])||0,ecartPct:parseFloat(cols[8])||0,estGagnant:(cols[9]||'').toUpperCase()==='OUI'};
+  }).filter(r=>r.sku&&r.sku!=='SKU');
 }
 
-function dernierSnapshot() {
-  if (!allData.length) return [];
-  // Trier par horodatage formaté "2026-04-21 17:38" — tri string fonctionne car format ISO
-  const horodatages = [...new Set(allData.map(r => r.horodatage))].sort();
-  const dernier = horodatages[horodatages.length - 1];
-  return allData.filter(r => r.horodatage === dernier);
+function dernierSnapshot(){
+  if(!allData.length)return[];
+  const hs=[...new Set(allData.map(r=>r.horodatage))].sort();
+  const dernier=hs[hs.length-1];
+  return allData.filter(r=>r.horodatage===dernier&&!isExclu(r.gagnant));
 }
 
-function rendreKPIs() {
-  const snap = dernierSnapshot();
-  const total = new Set(snap.map(r => r.sku)).size;
-  const gagnes = snap.filter(r => r.estGagnant);
-  const gagnesUniq = new Set(gagnes.map(r => r.sku)).size;
-  const perdusGrandEcart = snap.filter(r => !r.estGagnant && r.ecartPct > 10);
-  const taux = total > 0 ? Math.round(gagnesUniq / total * 100) : 0;
-
-  // Concurrent dominant
-  const comptage = {};
-  snap.filter(r => !r.estGagnant).forEach(r => {
-    comptage[r.gagnant] = (comptage[r.gagnant] || 0) + 1;
-  });
-  const top = Object.entries(comptage).sort((a,b) => b[1]-a[1])[0];
-
-  document.getElementById('kpiTaux').textContent = taux + '%';
-  document.getElementById('kpiTauxSub').textContent = `${total} SKUs sur le dernier snapshot`;
-  document.getElementById('kpiGagnes').textContent = gagnesUniq;
-  document.getElementById('kpiGagnesSub').textContent = `sur ${total} SKUs actifs`;
-  document.getElementById('kpiPerdus').textContent = perdusGrandEcart.length;
-  document.getElementById('kpiPerdusSub').textContent = 'SKUs avec écart > 10%';
-  document.getElementById('kpiConcurrent').textContent = top ? top[0].replace('Amazon.fr','Amazon') : '—';
-  document.getElementById('kpiConcurrentSub').textContent = top ? `${top[1]} BuyBox remportées` : '';
+function rendreKPIs(){
+  const snap=dernierSnapshot();
+  const total=new Set(snap.map(r=>r.sku)).size;
+  const gagnesUniq=new Set(snap.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+  const perdus=snap.filter(r=>!r.estGagnant&&r.ecartPct>10).length;
+  const taux=total>0?Math.round(gagnesUniq/total*100):0;
+  const comptage={};
+  snap.filter(r=>!r.estGagnant&&!isExclu(r.gagnant)).forEach(r=>{comptage[r.gagnant]=(comptage[r.gagnant]||0)+1;});
+  const top=Object.entries(comptage).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpiTaux').textContent=taux+'%';
+  document.getElementById('kpiTauxSub').textContent=total+' SKUs sur le dernier snapshot';
+  document.getElementById('kpiGagnes').textContent=gagnesUniq;
+  document.getElementById('kpiGagnesSub').textContent='sur '+total+' SKUs actifs';
+  document.getElementById('kpiPerdus').textContent=perdus;
+  document.getElementById('kpiPerdusSub').textContent='SKUs avec écart > 10%';
+  document.getElementById('kpiConcurrent').textContent=top?top[0].replace('Amazon.fr','Amazon'):'—';
+  document.getElementById('kpiConcurrentSub').textContent=top?top[1]+' BuyBox remportées':'';
 }
 
-function rendreCharts() {
-  // Chart horaire — taux BuyBox par heure sur toutes les données
-  const heures = ['10:00','12:00','14:00','16:00','18:00','20:00'];
-  const tauxParHeure = heures.map(h => {
-    const lignes = allData.filter(r => r.heure && r.heure.startsWith(h.split(':')[0]));
-    if (!lignes.length) return null;
-    const skusUniq = new Set(lignes.map(r => r.sku)).size;
-    const skusGagnes = new Set(lignes.filter(r => r.estGagnant).map(r => r.sku)).size;
-    return skusUniq > 0 ? Math.round(skusGagnes / skusUniq * 100) : 0;
+function rendreCharts(){
+  const heures=['10:00','12:00','14:00','16:00','18:00','20:00'];
+  const tauxParHeure=heures.map(h=>{
+    const lignes=allData.filter(r=>!isExclu(r.gagnant)&&r.heure&&r.heure.startsWith(h.split(':')[0]));
+    if(!lignes.length)return null;
+    const skusU=new Set(lignes.map(r=>r.sku)).size;
+    const skusG=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+    return skusU>0?Math.round(skusG/skusU*100):0;
   });
-
-  if (charts.horaire) charts.horaire.destroy();
-  charts.horaire = new Chart(document.getElementById('chartHoraire'), {
-    type: 'bar',
-    data: {
-      labels: heures,
-      datasets: [{
-        label: 'Taux BuyBox %',
-        data: tauxParHeure,
-        backgroundColor: tauxParHeure.map(v => v === null ? 'rgba(255,255,255,0.05)' : v >= 50 ? 'rgba(0,229,160,0.7)' : v >= 30 ? 'rgba(255,209,102,0.7)' : 'rgba(255,107,107,0.7)'),
-        borderRadius: 6,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min: 0, max: 100, ticks: { color: '#6b6b88', font: { family: 'DM Mono', size: 11 }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        x: { ticks: { color: '#6b6b88', font: { family: 'DM Mono', size: 11 } }, grid: { display: false } }
-      }
-    }
+  if(charts.horaire)charts.horaire.destroy();
+  charts.horaire=new Chart(document.getElementById('chartHoraire'),{
+    type:'bar',
+    data:{labels:heures,datasets:[{label:'Taux BuyBox %',data:tauxParHeure,backgroundColor:tauxParHeure.map(v=>v===null?'rgba(255,255,255,0.05)':v>=50?'rgba(0,229,160,0.7)':v>=30?'rgba(255,209,102,0.7)':'rgba(255,107,107,0.7)'),borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{color:'#6b6b88',font:{family:'DM Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#6b6b88',font:{family:'DM Mono',size:11}},grid:{display:false}}}}
   });
-
-  // Chart concurrents
-  const snap = dernierSnapshot();
-  const comptage = {};
-  snap.filter(r => !r.estGagnant).forEach(r => {
-    comptage[r.gagnant] = (comptage[r.gagnant] || 0) + 1;
-  });
-  const top8 = Object.entries(comptage).sort((a,b) => b[1]-a[1]).slice(0,8);
-  const couleurs = ['rgba(255,107,107,0.8)','rgba(255,209,102,0.8)','rgba(116,185,255,0.8)','rgba(162,155,254,0.8)','rgba(253,203,110,0.8)','rgba(85,239,196,0.8)','rgba(255,118,117,0.8)','rgba(99,110,250,0.8)'];
-
-  if (charts.concurrents) charts.concurrents.destroy();
-  charts.concurrents = new Chart(document.getElementById('chartConcurrents'), {
-    type: 'bar',
-    data: {
-      labels: top8.map(([nom]) => nom.length > 16 ? nom.slice(0,14)+'…' : nom),
-      datasets: [{
-        data: top8.map(([,n]) => n),
-        backgroundColor: couleurs,
-        borderRadius: 6,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#6b6b88', font: { family: 'DM Mono', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#f0f0f8', font: { family: 'DM Mono', size: 11 } }, grid: { display: false } }
-      }
-    }
-  });
+  rendreConcurrents();
 }
 
-function rendreHeatmap() {
-  const heures = ['10:00','12:00','14:00','16:00','18:00','20:00'];
-  // Grouper par date — les dates sont au format "2026-04-21"
-  const dates = [...new Set(allData.map(r => r.date))].filter(Boolean).sort().slice(-7);
-  const grid = document.getElementById('heatmapGrid');
-  grid.innerHTML = '';
-  grid.style.gridTemplateColumns = `100px repeat(${heures.length}, 1fr)`;
+function rendreConcurrents(){
+  const snaps=[...new Set(allData.map(r=>r.horodatage))].sort();
+  const dernH=snaps[snaps.length-1];
+  const avantH=snaps.length>1?snaps[snaps.length-2]:null;
+  const snapD=allData.filter(r=>r.horodatage===dernH&&!isExclu(r.gagnant));
+  const snapA=avantH?allData.filter(r=>r.horodatage===avantH&&!isExclu(r.gagnant)):[];
+  const totalD=new Set(snapD.map(r=>r.sku)).size;
+  const totalA=new Set(snapA.map(r=>r.sku)).size||totalD;
+  const cD={};snapD.filter(r=>!r.estGagnant).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
+  cD['Super10count']=snapD.filter(r=>r.estGagnant).length;
+  const cA={};snapA.filter(r=>!r.estGagnant).forEach(r=>{cA[r.gagnant]=(cA[r.gagnant]||0)+1;});
+  cA['Super10count']=snapA.filter(r=>r.estGagnant).length;
+  const top=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const maxVal=top[0]?.[1]||1;
+  const couleurs={'Super10count':'#00e5a0','Amazon.fr':'#ffd166'};
+  const palette=['#74b9ff','#ff6b6b','#a29bfe','#fd79a8','#00cec9','#e17055','#6c5ce7','#fdcb6e','#55efc4','#fab1a0'];
+  let ci=0;
+  const getColor=(n)=>{if(!couleurs[n])couleurs[n]=palette[ci++%palette.length];return couleurs[n];};
+  const rows=top.map(([nom,nb])=>{
+    const pct=totalD>0?(nb/totalD*100):0;
+    const nbP=cA[nom]||0;const pctP=totalA>0?(nbP/totalA*100):0;
+    const delta=pct-pctP;
+    const evo=avantH?(Math.abs(delta)<0.5?'<span class="evo-flat">—</span>':delta>0?`<span class="evo-up">▲ +${delta.toFixed(1)}%</span>`:`<span class="evo-down">▼ ${delta.toFixed(1)}%</span>`):'<span class="evo-flat">—</span>';
+    const barPct=Math.round(nb/maxVal*100);
+    const color=getColor(nom);
+    const nomH=nom==='Super10count'?'<strong style="color:var(--accent)">Super10count</strong>':(nom.length>22?nom.slice(0,20)+'…':nom);
+    return `<tr><td>${nomH}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${barPct}%;background:${color}"></div></div><span style="color:${color};min-width:36px;text-align:right">${pct.toFixed(1)}%</span></div></td><td style="text-align:right">${nb}</td><td style="text-align:right">${evo}</td></tr>`;
+  }).join('');
+  document.getElementById('tableConcurrents').innerHTML=`<table class="conc-table"><thead><tr><th>Concurrent</th><th>% BuyBox</th><th style="text-align:right">SKUs</th><th style="text-align:right">Évolution</th></tr></thead><tbody>${rows}</tbody></table>${avantH?`<div style="font-size:10px;color:var(--muted);padding:8px 12px;font-family:'DM Mono',monospace">vs snapshot précédent : ${avantH}</div>`:''}`;
+}
 
-  // Headers heures
-  grid.innerHTML += '<div class="hm-header"></div>';
-  heures.forEach(h => { grid.innerHTML += `<div class="hm-header">${h}</div>`; });
-
-  dates.forEach(date => {
-    grid.innerHTML += `<div class="hm-row-label">${date}</div>`;
-    heures.forEach(h => {
-      const hNum = h.split(':')[0];
-      const lignes = allData.filter(r => r.date === date && r.heure && r.heure.startsWith(hNum));
-      if (!lignes.length) {
-        grid.innerHTML += `<div class="hm-cell" style="background:rgba(255,255,255,0.03);color:#3a3a55">—</div>`;
-        return;
-      }
-      const skusU = new Set(lignes.map(r=>r.sku)).size;
-      const skusG = new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
-      const taux = Math.round(skusG / skusU * 100);
-      const alpha = taux / 100;
-      const bg = taux >= 50 ? `rgba(0,229,160,${0.1 + alpha*0.5})` : taux >= 25 ? `rgba(255,209,102,${0.1 + alpha*0.4})` : `rgba(255,107,107,${0.15})`;
-      const color = taux >= 50 ? '#00e5a0' : taux >= 25 ? '#ffd166' : '#ff6b6b';
-      grid.innerHTML += `<div class="hm-cell" style="background:${bg};color:${color}">${taux}%</div>`;
+function rendreHeatmap(){
+  const heures=['10:00','12:00','14:00','16:00','18:00','20:00'];
+  const dates=[...new Set(allData.map(r=>r.date))].filter(Boolean).sort().slice(-7);
+  const grid=document.getElementById('heatmapGrid');
+  grid.innerHTML='';grid.style.gridTemplateColumns=`100px repeat(${heures.length},1fr)`;
+  grid.innerHTML+='<div class="hm-header"></div>';
+  heures.forEach(h=>{grid.innerHTML+=`<div class="hm-header">${h}</div>`;});
+  dates.forEach(date=>{
+    grid.innerHTML+=`<div class="hm-row-label">${date}</div>`;
+    heures.forEach(h=>{
+      const hNum=h.split(':')[0];
+      const lignes=allData.filter(r=>r.date===date&&r.heure&&r.heure.startsWith(hNum));
+      if(!lignes.length){grid.innerHTML+=`<div class="hm-cell" style="background:rgba(255,255,255,0.03);color:#3a3a55">—</div>`;return;}
+      const skusU=new Set(lignes.map(r=>r.sku)).size;
+      const skusG=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+      const taux=Math.round(skusG/skusU*100);
+      const bg=taux>=50?`rgba(0,229,160,${0.1+taux/100*0.5})`:taux>=25?`rgba(255,209,102,${0.1+taux/100*0.4})`:`rgba(255,107,107,0.15)`;
+      const color=taux>=50?'#00e5a0':taux>=25?'#ffd166':'#ff6b6b';
+      grid.innerHTML+=`<div class="hm-cell" style="background:${bg};color:${color}">${taux}%</div>`;
     });
   });
 }
 
-function appliquerFiltre() {
-  const snap = dernierSnapshot();
-  let data = [...snap];
-
-  if (currentFilter === 'gagnes') data = data.filter(r => r.estGagnant);
-  else if (currentFilter === 'perdus') data = data.filter(r => !r.estGagnant);
-  else if (currentFilter === 'amazon') data = data.filter(r => r.gagnant.toLowerCase().includes('amazon.fr') && !r.gagnant.toLowerCase().includes('seconde'));
-  else if (currentFilter === 'fort-ecart') data = data.filter(r => r.ecartPct > 20 && !r.estGagnant);
-
-  if (currentSearch) {
-    data = data.filter(r => r.sku.toLowerCase().includes(currentSearch.toLowerCase()) || r.gagnant.toLowerCase().includes(currentSearch.toLowerCase()));
-  }
-
-  data.sort((a, b) => {
-    let va = a[sortCol], vb = b[sortCol];
-    if (typeof va === 'string') return sortDir * va.localeCompare(vb);
-    return sortDir * (va - vb);
-  });
-
-  filteredData = data;
-  currentPage = 1;
-  rendrePage();
+function appliquerFiltre(){
+  const snap=dernierSnapshot();let data=[...snap];
+  if(currentFilter==='gagnes')data=data.filter(r=>r.estGagnant);
+  else if(currentFilter==='perdus')data=data.filter(r=>!r.estGagnant);
+  else if(currentFilter==='amazon')data=data.filter(r=>r.gagnant.toLowerCase().includes('amazon.fr')&&!r.gagnant.toLowerCase().includes('seconde'));
+  else if(currentFilter==='fort-ecart')data=data.filter(r=>r.ecartPct>20&&!r.estGagnant);
+  if(currentSearch)data=data.filter(r=>r.sku.toLowerCase().includes(currentSearch.toLowerCase())||r.gagnant.toLowerCase().includes(currentSearch.toLowerCase()));
+  data.sort((a,b)=>{let va=a[sortCol],vb=b[sortCol];if(typeof va==='string')return sortDir*va.localeCompare(vb);return sortDir*(va-vb);});
+  filteredData=data;currentPage=1;rendrePage();
 }
 
-function rendrePage() {
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const page = filteredData.slice(start, start + PAGE_SIZE);
-  const tbody = document.getElementById('tableBody');
-
-  tbody.innerHTML = page.map(r => {
-    const ecartCls = r.ecartPct > 20 ? 'ecart-positive' : r.ecartPct < 0 ? 'ecart-negative' : 'ecart-neutre';
-    const statut = r.estGagnant
-      ? `<span class="badge badge-win">ON GAGNE</span>`
-      : r.gagnant.toLowerCase().includes('amazon') ? `<span class="badge badge-amazon">${r.gagnant.length > 18 ? r.gagnant.slice(0,16)+'…' : r.gagnant}</span>`
-      : `<span class="badge badge-lose">${r.gagnant.length > 18 ? r.gagnant.slice(0,16)+'…' : r.gagnant}</span>`;
-    return `<tr>
-      <td>${r.sku}</td>
-      <td style="color:var(--muted);font-size:12px">${r.gagnant.length > 24 ? r.gagnant.slice(0,22)+'…' : r.gagnant}</td>
-      <td>${r.prixBB > 0 ? r.prixBB.toFixed(2) + ' €' : '—'}</td>
-      <td>${r.prixClient > 0 ? r.prixClient.toFixed(2) + ' €' : '—'}</td>
-      <td class="${ecartCls}">${r.ecartPct > 0 ? '+' : ''}${r.ecartPct.toFixed(1)}%</td>
-      <td>${statut}</td>
-    </tr>`;
+function rendrePage(){
+  const start=(currentPage-1)*PAGE_SIZE;
+  const page=filteredData.slice(start,start+PAGE_SIZE);
+  const tbody=document.getElementById('tableBody');
+  tbody.innerHTML=page.map(r=>{
+    const ecartCls=r.ecartPct>20?'ecart-positive':r.ecartPct<0?'ecart-negative':'ecart-neutre';
+    const statut=r.estGagnant?'<span class="badge badge-win">ON GAGNE</span>':r.gagnant.toLowerCase().includes('amazon')?`<span class="badge badge-amazon">${r.gagnant.length>18?r.gagnant.slice(0,16)+'…':r.gagnant}</span>`:`<span class="badge badge-lose">${r.gagnant.length>18?r.gagnant.slice(0,16)+'…':r.gagnant}</span>`;
+    return `<tr><td>${r.sku}</td><td style="color:var(--muted);font-size:12px">${r.gagnant.length>24?r.gagnant.slice(0,22)+'…':r.gagnant}</td><td>${r.prixBB>0?r.prixBB.toFixed(2)+' €':'—'}</td><td>${r.prixClient>0?r.prixClient.toFixed(2)+' €':'—'}</td><td class="${ecartCls}">${r.ecartPct>0?'+':''}${r.ecartPct.toFixed(1)}%</td><td>${statut}</td></tr>`;
   }).join('');
-
-  // Pagination
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-  const pag = document.getElementById('pagination');
-  if (totalPages <= 1) { pag.innerHTML = ''; return; }
-  let html = `<span class="page-info">${filteredData.length} SKUs</span>`;
-  for (let i = 1; i <= Math.min(totalPages, 8); i++) {
-    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
-  }
-  pag.innerHTML = html;
+  const totalPages=Math.ceil(filteredData.length/PAGE_SIZE);
+  const pag=document.getElementById('pagination');
+  if(totalPages<=1){pag.innerHTML='';return;}
+  let html=`<span class="page-info">${filteredData.length} SKUs</span>`;
+  for(let i=1;i<=Math.min(totalPages,8);i++)html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  pag.innerHTML=html;
 }
 
-function goPage(n) { currentPage = n; rendrePage(); }
-function filtrer(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  appliquerFiltre();
-}
-function rechercherSKU(v) { currentSearch = v; appliquerFiltre(); }
-function trierPar(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = -1; }
-  appliquerFiltre();
-}
+function goPage(n){currentPage=n;rendrePage();}
+function filtrer(f,btn){currentFilter=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');appliquerFiltre();}
+function rechercherSKU(v){currentSearch=v;appliquerFiltre();}
+function trierPar(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}appliquerFiltre();}
 
 chargerDonnees();
-setInterval(chargerDonnees, 5 * 60 * 1000); // Auto-refresh toutes les 5 min
+setInterval(chargerDonnees,5*60*1000);
 </script>
 </body>
 </html>
