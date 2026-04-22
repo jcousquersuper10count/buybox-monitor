@@ -6,71 +6,121 @@
 <title>BuyBox Monitor — Super10count</title>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--bg0:#0d0d1a;--bg1:#12122a;--bg2:#1a1a3a;--bg3:#20204a;--border:rgba(120,120,255,0.15);--border2:rgba(120,120,255,0.3);--text:#e8e8ff;--muted:#8888cc;--c1:#00f5d4;--c2:#f72585;--c3:#7209b7;--c4:#4cc9f0;--c5:#f77f00;--c6:#a8ff3e;--c7:#ff006e;--c8:#8338ec;}
+:root{--bg0:#0d0d1a;--bg1:#12122a;--bg2:#1a1a3a;--bg3:#20204a;--border:rgba(120,120,255,0.15);--border2:rgba(120,120,255,0.3);--text:#e8e8ff;--muted:#9090cc;--c1:#00f5d4;--c2:#f72585;--c3:#7209b7;--c4:#4cc9f0;--c5:#f77f00;--c6:#a8ff3e;--c7:#ff006e;--c8:#8338ec;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Exo 2',sans-serif;background:var(--bg0);color:var(--text);min-height:100vh;overflow-x:hidden;font-weight:400;letter-spacing:0.01em;}
-body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 50%,rgba(114,9,183,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(0,245,212,0.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
+body{font-family:'Exo 2',sans-serif;background:var(--bg0);color:var(--text);min-height:100vh;overflow-x:hidden;font-weight:400;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(114,9,183,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(0,245,212,0.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
 
-header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;}
-.header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;}
+/* HEADER */
+header{position:sticky;top:0;z-index:200;background:rgba(13,13,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 2rem;}
 .logo{display:flex;align-items:center;gap:14px;}
-.logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--c1),var(--c4));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000;font-family:'Share Tech Mono',monospace;}
+.logo-icon{width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,var(--c1),var(--c4));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000;font-family:'Share Tech Mono',monospace;}
 .logo-text{font-size:16px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;background:linear-gradient(90deg,var(--c1),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.logo-sub{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;letter-spacing:0.1em;}
-.header-right{display:flex;align-items:center;gap:12px;}
+.logo-sub{font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;letter-spacing:0.08em;}
+.header-right{display:flex;align-items:center;gap:10px;}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1);animation:blink 1.5s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 .last-update{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);}
-.refresh-btn{background:transparent;border:1px solid var(--border2);color:var(--c1);padding:7px 16px;border-radius:6px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;}
-.refresh-btn:hover{background:rgba(0,245,212,0.1);box-shadow:0 0 16px rgba(0,245,212,0.25);}
-.export-btn{background:transparent;border:1px solid rgba(168,255,62,0.4);color:var(--c6);padding:7px 16px;border-radius:6px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;}
-.export-btn:hover{background:rgba(168,255,62,0.1);box-shadow:0 0 16px rgba(168,255,62,0.2);}
+.hbtn{padding:7px 16px;border-radius:6px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;border:1px solid;}
+.hbtn-refresh{background:transparent;border-color:var(--border2);color:var(--c1);}
+.hbtn-refresh:hover{background:rgba(0,245,212,0.1);}
+.hbtn-export{background:transparent;border-color:rgba(168,255,62,0.35);color:var(--c6);}
+.hbtn-export:hover{background:rgba(168,255,62,0.08);}
 
+/* NAV TABS */
+nav{background:rgba(13,13,26,0.9);border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:190;backdrop-filter:blur(12px);}
+.nav-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;gap:0;padding:0 2rem;overflow-x:auto;}
+.nav-tab{padding:14px 22px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:8px;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--c1);border-bottom-color:var(--c1);}
+.nav-tab .mp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
-.container{max-width:1600px;margin:0 auto;padding:2rem;position:relative;z-index:1;}
+/* PAGES */
+.page{display:none;position:relative;z-index:1;}
+.page.active{display:block;}
+.container{max-width:1600px;margin:0 auto;padding:2rem;}
 
-/* BRAND FILTER — double dropdown */
+/* FILTRE MARQUE */
 .brand-bar{display:flex;align-items:center;gap:12px;margin-bottom:2rem;flex-wrap:wrap;background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;}
-.brand-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;}
-.brand-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:8px 36px 8px 14px;border-radius:8px;font-size:14px;font-family:'Exo 2',sans-serif;font-weight:600;cursor:pointer;outline:none;transition:all 0.2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236868aa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-.brand-select:focus{border-color:var(--c1);box-shadow:0 0 12px rgba(0,245,212,0.15);}
-.brand-select option{background:var(--bg2);color:var(--text);}
-.brand-active-tag{display:flex;align-items:center;gap:6px;background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.25);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--c1);}
-.brand-active-tag .clear{cursor:pointer;opacity:0.6;font-size:14px;line-height:1;}
+.brand-label{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;font-weight:600;}
+.brand-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:8px 36px 8px 14px;border-radius:8px;font-size:14px;font-family:'Exo 2',sans-serif;font-weight:600;cursor:pointer;outline:none;transition:all 0.2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239090cc' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.brand-select:focus{border-color:var(--c1);}
+.brand-arrow{color:var(--muted);font-size:18px;}
+.brand-active-tag{display:flex;align-items:center;gap:8px;background:rgba(0,245,212,0.1);border:1px solid rgba(0,245,212,0.25);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--c1);}
+.brand-active-tag .clear{cursor:pointer;opacity:0.6;font-size:15px;}
 .brand-active-tag .clear:hover{opacity:1;}
-.brand-arrow{color:var(--muted);font-size:16px;}
 
-/* KPI */
+/* PAGE GARDE — KPI GRID MARKETPLACES */
+.mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem;}
+.mp-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.75rem;position:relative;overflow:hidden;cursor:pointer;transition:all 0.25s;}
+.mp-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.mp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0;}
+.mp-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.mp-name{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;}
+.mp-link{font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.mp-link:hover{color:var(--c1);}
+.mp-taux{font-size:48px;font-weight:800;line-height:1;margin-bottom:8px;}
+.mp-sub{font-size:12px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
+.mp-bar{height:4px;background:rgba(255,255,255,0.07);border-radius:2px;margin-top:1.25rem;overflow:hidden;}
+.mp-bar-fill{height:100%;border-radius:2px;transition:width 0.6s ease;}
+.mp-glow{position:absolute;bottom:-20px;right:-20px;width:100px;height:100px;border-radius:50%;opacity:0.12;filter:blur(25px);}
+.mp-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem;}
+.mp-stat{background:rgba(0,0,0,0.2);border-radius:8px;padding:8px 10px;}
+.mp-stat-label{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.mp-stat-val{font-size:15px;font-weight:700;}
+
+/* COULEURS MP */
+.mp-amazon::before,.mp-amazon .mp-name{color:#f77f00;}
+.mp-amazon::before{background:linear-gradient(90deg,#f77f00,#ffbe0b);}
+.mp-amazon .mp-taux,.mp-amazon .mp-bar-fill,.mp-amazon .mp-glow{color:#f77f00;background:#f77f00;}
+.mp-cdiscount::before,.mp-cdiscount .mp-name{color:#00c4ff;}
+.mp-cdiscount::before{background:linear-gradient(90deg,#00c4ff,#0077b6);}
+.mp-cdiscount .mp-taux,.mp-cdiscount .mp-bar-fill,.mp-cdiscount .mp-glow{color:#00c4ff;background:#00c4ff;}
+.mp-darty::before,.mp-darty .mp-name{color:#ff4b4b;}
+.mp-darty::before{background:linear-gradient(90deg,#ff4b4b,#ff006e);}
+.mp-darty .mp-taux,.mp-darty .mp-bar-fill,.mp-darty .mp-glow{color:#ff4b4b;background:#ff4b4b;}
+.mp-fnac::before,.mp-fnac .mp-name{color:#f7c948;}
+.mp-fnac::before{background:linear-gradient(90deg,#f7c948,#f77f00);}
+.mp-fnac .mp-taux,.mp-fnac .mp-bar-fill,.mp-fnac .mp-glow{color:#f7c948;background:#f7c948;}
+
+/* CHARTS OVERVIEW */
+.overview-charts{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem;}
+
+/* DETAIL PAGE KPIs */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
-.kpi-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;transition:border-color 0.3s;}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
-.kpi-card.c1::before{background:linear-gradient(90deg,var(--c1),var(--c4));}
-.kpi-card.c2::before{background:linear-gradient(90deg,var(--c2),var(--c7));}
-.kpi-card.c3::before{background:linear-gradient(90deg,var(--c5),var(--c2));}
-.kpi-card.c4::before{background:linear-gradient(90deg,var(--c3),var(--c8));}
+.kpi-card{background:var(--bg1);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:relative;overflow:hidden;transition:border-color 0.2s;}
 .kpi-card:hover{border-color:var(--border2);}
-.kpi-label{font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
-.kpi-value{font-size:36px;font-weight:800;line-height:1;}
-.kpi-card.c1 .kpi-value{color:var(--c1);text-shadow:0 0 20px rgba(0,245,212,0.4);}
-.kpi-card.c2 .kpi-value{color:var(--c2);text-shadow:0 0 20px rgba(247,37,133,0.4);}
-.kpi-card.c3 .kpi-value{color:var(--c5);text-shadow:0 0 20px rgba(247,127,0,0.4);}
-.kpi-card.c4 .kpi-value{font-size:18px;padding-top:4px;color:var(--c4);text-shadow:0 0 20px rgba(76,201,240,0.4);}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-c1::before{background:linear-gradient(90deg,var(--c1),var(--c4));}
+.kpi-c2::before{background:linear-gradient(90deg,var(--c2),var(--c7));}
+.kpi-c3::before{background:linear-gradient(90deg,var(--c5),var(--c2));}
+.kpi-c4::before{background:linear-gradient(90deg,var(--c3),var(--c8));}
+.kpi-label{font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:600;}
+.kpi-value{font-size:34px;font-weight:800;line-height:1;}
+.kpi-c1 .kpi-value{color:var(--c1);}
+.kpi-c2 .kpi-value{color:var(--c2);}
+.kpi-c3 .kpi-value{color:var(--c5);}
+.kpi-c4 .kpi-value{font-size:17px;padding-top:4px;color:var(--c4);}
 .kpi-sub{font-size:12px;color:var(--muted);margin-top:8px;font-family:'Share Tech Mono',monospace;}
-.kpi-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:0.15;filter:blur(20px);}
-.kpi-card.c1 .kpi-glow{background:var(--c1);}
-.kpi-card.c2 .kpi-glow{background:var(--c2);}
-.kpi-card.c3 .kpi-glow{background:var(--c5);}
-.kpi-card.c4 .kpi-glow{background:var(--c4);}
+.kpi-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:0.12;filter:blur(20px);}
+.kpi-c1 .kpi-glow{background:var(--c1);}
+.kpi-c2 .kpi-glow{background:var(--c2);}
+.kpi-c3 .kpi-glow{background:var(--c5);}
+.kpi-c4 .kpi-glow{background:var(--c4);}
 
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
-.card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;}
+/* CARD */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:14px;padding:1.5rem;}
 .card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:1.25rem;font-family:'Share Tech Mono',monospace;}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
 .chart-wrap{position:relative;height:200px;}
 
+/* CONCURRENTS */
 .conc-table{width:100%;border-collapse:collapse;}
-.conc-table th{font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
-.conc-table td{padding:8px 10px;font-size:13px;font-family:'Share Tech Mono',monospace;border-bottom:1px solid rgba(120,120,255,0.06);vertical-align:middle;}
+.conc-table th{font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;}
+.conc-table td{padding:9px 10px;font-size:13px;font-family:'Share Tech Mono',monospace;border-bottom:1px solid rgba(120,120,255,0.06);vertical-align:middle;}
 .conc-table tr:hover td{background:rgba(120,120,255,0.05);}
 .bar-wrap{display:flex;align-items:center;gap:8px;}
 .bar-bg{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;min-width:50px;}
@@ -79,53 +129,55 @@ header{position:sticky;top:0;z-index:100;background:rgba(13,13,26,0.92);backdrop
 .evo-down{color:var(--c1);font-size:12px;font-weight:700;}
 .evo-flat{color:var(--muted);font-size:12px;}
 
-.heatmap-grid{display:grid;gap:3px;font-family:'Share Tech Mono',monospace;font-size:10px;}
-.hm-header{color:var(--muted);text-align:center;padding:4px 2px;font-size:12px;}
+/* HEATMAP */
+.heatmap-grid{display:grid;gap:3px;font-family:'Share Tech Mono',monospace;}
+.hm-header{color:var(--muted);text-align:center;padding:4px 2px;font-size:12px;font-weight:600;}
 .hm-row-label{color:var(--muted);padding:4px 2px;display:flex;align-items:center;font-size:11px;}
-.hm-cell{border-radius:4px;text-align:center;font-weight:700;font-size:13px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+.hm-cell{border-radius:4px;text-align:center;font-weight:700;font-size:13px;min-height:34px;display:flex;align-items:center;justify-content:center;}
 
+/* TABLE SKU */
 .table-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
 .filter-tabs{display:flex;gap:6px;flex-wrap:wrap;}
 .tab{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:'Exo 2',sans-serif;text-transform:uppercase;letter-spacing:0.05em;}
 .tab.active{border-color:var(--c1);color:var(--c1);background:rgba(0,245,212,0.08);}
-.search-box{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:20px;font-size:12px;font-family:'Share Tech Mono',monospace;width:200px;outline:none;}
+.search-box{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:20px;font-size:13px;font-family:'Share Tech Mono',monospace;width:220px;outline:none;}
 .search-box::placeholder{color:var(--muted);}
 .search-box:focus{border-color:var(--border2);}
-
 .sku-table{width:100%;border-collapse:collapse;}
-.sku-table thead th{font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;}
+.sku-table thead th{font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;font-weight:600;}
 .sku-table thead th:hover{color:var(--text);}
 .sku-table tbody tr{border-bottom:1px solid rgba(120,120,255,0.07);transition:background 0.1s;}
 .sku-table tbody tr:hover{background:rgba(120,120,255,0.06);}
 .sku-table tbody td{padding:10px 12px;font-size:13px;font-family:'Share Tech Mono',monospace;}
-.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.05em;font-family:'Exo 2',sans-serif;text-transform:uppercase;}
+.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.04em;font-family:'Exo 2',sans-serif;text-transform:uppercase;}
 .badge-win{background:rgba(0,245,212,0.12);color:var(--c1);border:1px solid rgba(0,245,212,0.2);}
 .badge-lose{background:rgba(247,37,133,0.12);color:var(--c2);border:1px solid rgba(247,37,133,0.2);}
 .badge-amazon{background:rgba(247,127,0,0.12);color:var(--c5);border:1px solid rgba(247,127,0,0.2);}
-.ecart-pos{color:var(--c2);}
-.ecart-neg{color:var(--c1);}
+.ecart-pos{color:var(--c2);font-weight:600;}
+.ecart-neg{color:var(--c1);font-weight:600;}
 .ecart-neu{color:var(--muted);}
-.brand-tag{font-size:11px;font-weight:600;color:var(--c4);background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.15);padding:1px 7px;border-radius:8px;}
-.supplier-tag{font-size:11px;font-weight:600;color:var(--c6);background:rgba(168,255,62,0.08);border:1px solid rgba(168,255,62,0.15);padding:1px 7px;border-radius:8px;}
+.brand-tag{font-size:11px;font-weight:700;color:var(--c4);background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.15);padding:2px 8px;border-radius:8px;}
+.ref-tag{font-size:11px;font-weight:600;color:#c3a0ff;background:rgba(195,160,255,0.08);border:1px solid rgba(195,160,255,0.15);padding:2px 8px;border-radius:8px;}
+.supplier-tag{font-size:11px;font-weight:700;color:var(--c6);background:rgba(168,255,62,0.08);border:1px solid rgba(168,255,62,0.15);padding:2px 8px;border-radius:8px;}
 
 .pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:1.5rem;}
-.page-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:6px;font-size:11px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;}
+.page-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;}
 .page-btn:hover,.page-btn.active{border-color:var(--c1);color:var(--c1);}
 .page-info{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);}
 
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:20px;}
-.loading-ring{width:48px;height:48px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--c1);animation:spin 0.8s linear infinite;}
+.loading-ring{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--c1);animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);}
+.loading-text{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--muted);font-weight:600;}
 .error-box{background:rgba(247,37,133,0.08);border:1px solid rgba(247,37,133,0.2);border-radius:12px;padding:2rem;margin:2rem 0;text-align:center;}
-.error-box h3{color:var(--c2);margin-bottom:8px;}
-.error-box p{color:var(--muted);font-size:14px;line-height:1.6;}
-.section-label{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
-footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);position:relative;z-index:1;}
+.error-box h3{color:var(--c2);margin-bottom:8px;font-size:18px;}
+.error-box p{color:var(--muted);font-size:14px;line-height:1.7;}
+
+footer{border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);position:relative;z-index:1;}
 footer a{color:var(--c1);text-decoration:none;}
-@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.container{padding:1rem}}
+@media(max-width:1100px){.mp-grid{grid-template-columns:repeat(2,1fr)}.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-row,.overview-charts{grid-template-columns:1fr}}
+@media(max-width:600px){.mp-grid{grid-template-columns:1fr}.container{padding:1rem}}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -135,500 +187,631 @@ footer a{color:var(--c1);text-decoration:none;}
       <div class="logo-icon">BB</div>
       <div>
         <div class="logo-text">BuyBox Monitor</div>
-        <div class="logo-sub">super10count · amazon · multiply</div>
+        <div class="logo-sub">super10count · multiply · 4 marketplaces</div>
       </div>
     </div>
     <div class="header-right">
       <div class="live-dot"></div>
       <div class="last-update" id="lastUpdate">Chargement…</div>
-      <button class="export-btn" onclick="exporterExcel()">↓ Export Excel</button>
-      <button class="refresh-btn" onclick="chargerDonnees()">↻ Refresh</button>
+      <button class="hbtn hbtn-export" onclick="exporterExcel()">↓ Export Excel</button>
+      <button class="hbtn hbtn-refresh" onclick="chargerTout()">↻ Refresh</button>
     </div>
   </div>
 </header>
 
-<div class="container">
-
-  <div id="loadingView" class="loading">
-    <div class="loading-ring"></div>
-    <div class="loading-text" id="loadingMsg">Chargement des données…</div>
-  </div>
-
-  <div id="errorView" style="display:none">
-    <div class="error-box">
-      <h3>Erreur de chargement</h3>
-      <p>Vérifie que les deux Sheets sont publics.<br>
-      <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4/gviz/tq?tqx=out:json" target="_blank" style="color:var(--c1)">→ Tester Sheet BuyBox</a></p>
+<nav>
+  <div class="nav-inner">
+    <div class="nav-tab active" onclick="allerPage('accueil',this)" data-page="accueil">
+      <span class="mp-dot" style="background:#00f5d4"></span> Vue d'ensemble
+    </div>
+    <div class="nav-tab" onclick="allerPage('amazon',this)" data-page="amazon">
+      <span class="mp-dot" style="background:#f77f00"></span> Amazon
+    </div>
+    <div class="nav-tab" onclick="allerPage('cdiscount',this)" data-page="cdiscount">
+      <span class="mp-dot" style="background:#00c4ff"></span> Cdiscount
+    </div>
+    <div class="nav-tab" onclick="allerPage('darty',this)" data-page="darty">
+      <span class="mp-dot" style="background:#ff4b4b"></span> Darty
+    </div>
+    <div class="nav-tab" onclick="allerPage('fnac',this)" data-page="fnac">
+      <span class="mp-dot" style="background:#f7c948"></span> Fnac
     </div>
   </div>
+</nav>
 
-  <div id="dashboard" style="display:none">
+<!-- LOADING -->
+<div id="loadingView" class="loading">
+  <div class="loading-ring"></div>
+  <div class="loading-text" id="loadingMsg">Initialisation…</div>
+</div>
 
-    <!-- BRAND FILTER double dropdown -->
-    <div class="brand-bar">
-      <span class="brand-label">Filtrer par marque :</span>
-      <select class="brand-select" id="selectLettre" onchange="onLetterChange()">
-        <option value="">— Lettre —</option>
-      </select>
-      <span class="brand-arrow">›</span>
-      <select class="brand-select" id="selectMarque" onchange="onBrandChange()" disabled>
-        <option value="">— Marque —</option>
-      </select>
-      <div id="brandActiveTag" style="display:none" class="brand-active-tag">
-        <span id="brandActiveLabel"></span>
-        <span class="clear" onclick="resetBrand()" title="Réinitialiser">✕</span>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card c1"><div class="kpi-label">Taux BuyBox</div><div class="kpi-value" id="kpiTaux">—</div><div class="kpi-sub" id="kpiTauxSub">—</div><div class="kpi-glow"></div></div>
-      <div class="kpi-card c2"><div class="kpi-label">SKUs gagnés</div><div class="kpi-value" id="kpiGagnes">—</div><div class="kpi-sub" id="kpiGagnesSub">—</div><div class="kpi-glow"></div></div>
-      <div class="kpi-card c3"><div class="kpi-label">SKUs perdus &gt;10%</div><div class="kpi-value" id="kpiPerdus">—</div><div class="kpi-sub" id="kpiPerdusSub">—</div><div class="kpi-glow"></div></div>
-      <div class="kpi-card c4"><div class="kpi-label">Concurrent #1</div><div class="kpi-value" id="kpiConcurrent">—</div><div class="kpi-sub" id="kpiConcurrentSub">—</div><div class="kpi-glow"></div></div>
-    </div>
-
-    <!-- CHARTS -->
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-title">// Taux BuyBox par créneau horaire</div>
-        <div class="chart-wrap"><canvas id="chartHoraire"></canvas></div>
-      </div>
-      <div class="card" style="overflow-y:auto;max-height:300px;">
-        <div class="card-title">// Concurrents — % BuyBox &amp; évolution</div>
-        <div id="tableConcurrents"></div>
-      </div>
-    </div>
-
-    <!-- HEATMAP -->
-    <div class="card" style="margin-bottom:2rem;">
-      <div class="card-title">// Heatmap BuyBox — 7 derniers jours × créneaux (cyan = on gagne)</div>
-      <div id="heatmapGrid" class="heatmap-grid"></div>
-    </div>
-
-    <!-- TABLE SKU -->
-    <div class="card">
-      <div class="table-controls">
-        <div>
-          <div class="section-label" style="margin-bottom:8px">// Dernier snapshot SKUs</div>
-          <div class="filter-tabs">
-            <button class="tab active" onclick="filtrer('tous',this)">Tous</button>
-            <button class="tab" onclick="filtrer('gagnes',this)">On gagne</button>
-            <button class="tab" onclick="filtrer('perdus',this)">On perd</button>
-            <button class="tab" onclick="filtrer('amazon',this)">Amazon.fr</button>
-            <button class="tab" onclick="filtrer('fort-ecart',this)">Écart &gt;20%</button>
-          </div>
-        </div>
-        <input class="search-box" type="text" placeholder="SKU / marque / fournisseur…" oninput="rechercherSKU(this.value)">
-      </div>
-      <table class="sku-table">
-        <thead><tr>
-          <th onclick="trierPar('sku')">SKU ↕</th>
-          <th onclick="trierPar('marque')">Marque ↕</th>
-          <th onclick="trierPar('fournisseur')">Fournisseur ↕</th>
-          <th onclick="trierPar('gagnant')">Gagnant BuyBox ↕</th>
-          <th onclick="trierPar('prixBB')">Prix BB ↕</th>
-          <th onclick="trierPar('prixClient')">Notre prix ↕</th>
-          <th onclick="trierPar('ecartPct')">Écart % ↕</th>
-          <th>Statut</th>
-        </tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-      <div class="pagination" id="pagination"></div>
-    </div>
-
+<div id="errorView" style="display:none;padding:2rem;">
+  <div class="error-box">
+    <h3>Erreur de chargement</h3>
+    <p>Vérifie que les Sheets sont publics et que le Apps Script a collecté des données.<br>
+    <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4/gviz/tq?tqx=out:json" target="_blank" style="color:var(--c1)">→ Tester le Sheet</a></p>
   </div>
 </div>
 
+<!-- PAGE ACCUEIL -->
+<div id="page-accueil" class="page">
+  <div class="container">
+    <!-- Filtre marque -->
+    <div class="brand-bar">
+      <span class="brand-label">Marque :</span>
+      <select class="brand-select" id="acc-selectLettre" onchange="accOnLetter()">
+        <option value="">— Lettre —</option>
+      </select>
+      <span class="brand-arrow">›</span>
+      <select class="brand-select" id="acc-selectMarque" onchange="accOnBrand()" disabled>
+        <option value="">— Marque —</option>
+      </select>
+      <div id="acc-brandTag" style="display:none" class="brand-active-tag">
+        <span id="acc-brandLabel"></span>
+        <span class="clear" onclick="accResetBrand()">✕</span>
+      </div>
+    </div>
+
+    <!-- Cards marketplaces -->
+    <div class="mp-grid" id="mpGrid"></div>
+
+    <!-- Charts comparatifs -->
+    <div class="overview-charts">
+      <div class="card">
+        <div class="card-title">// Taux BuyBox comparé — dernier snapshot</div>
+        <div class="chart-wrap"><canvas id="chartOverviewBar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">// Évolution du taux BuyBox dans le temps</div>
+        <div class="chart-wrap"><canvas id="chartOverviewLine"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGES MARKETPLACE (générées dynamiquement) -->
+<div id="page-amazon" class="page"></div>
+<div id="page-cdiscount" class="page"></div>
+<div id="page-darty" class="page"></div>
+<div id="page-fnac" class="page"></div>
+
 <footer>
-  BuyBox Monitor · Super10count · <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4" target="_blank">Sheet BuyBox ↗</a>
+  BuyBox Monitor · Super10count ·
+  <a href="https://docs.google.com/spreadsheets/d/1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4" target="_blank">Google Sheet ↗</a>
 </footer>
 
 <script>
-const SHEET_BB  = '1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4';
+// ── CONFIG ──
+const SHEET_ID  = '1ruKqt7UPSBlMnqygzflV3yxJmZ5Lz5Mpy93AgSEAqQ4';
 const SHEET_CAT = '1ggZJ0qKnklWPuKd1Cs1HuouXF8TjyF8sGBz1H4rizyE';
-const SHEET_NAME= 'Données brutes';
 
-let allData=[], filteredData=[], skuMeta={};
-let currentFilter='tous', currentSearch='', currentBrand='';
-let sortCol='ecartPct', sortDir=-1, currentPage=1;
-const PAGE_SIZE=30;
-let charts={};
+const MARKETPLACES = [
+  { id:'amazon',    nom:'Amazon',    onglet:'Amazon - Données',    color:'#f77f00', cls:'mp-amazon',    link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=0df20fc1-0ef4-4165-8d19-599c4721fc79&dl=1&catalog_id=60022&list_landed_prices=true' },
+  { id:'cdiscount', nom:'Cdiscount', onglet:'Cdiscount - Données', color:'#00c4ff', cls:'mp-cdiscount', link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=1c550f0d-2063-4b75-a5ce-3bbfc46addbd&dl=1&catalog_id=60016&list_landed_prices=true' },
+  { id:'darty',     nom:'Darty',     onglet:'Darty - Données',     color:'#ff4b4b', cls:'mp-darty',     link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=1a734c71-0770-4e30-b6e2-56e8db0e5d2c&dl=1&catalog_id=60885&list_landed_prices=true' },
+  { id:'fnac',      nom:'Fnac',      onglet:'Fnac - Données',      color:'#f7c948', cls:'mp-fnac',      link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=063fe921-93be-414b-955d-c942e115b823&dl=1&catalog_id=60152&list_landed_prices=true' }
+];
 
-// Index marques par lettre : {'A':['Airlux','Ariston',...], 'B':['Beko',...]}
-let marquesParLettre={};
+// ── STATE ──
+let skuMeta = {}; // sku → {ref, marque, fournisseur}
+let mpData  = {}; // mp.id → []
+let marquesParLettre = {};
+let currentBrand = '';
+let activePage = 'accueil';
+let mpState = {}; // par mp.id : {filter, search, sortCol, sortDir, page}
+let charts = {};
+let filteredData = []; // pour export
 
+MARKETPLACES.forEach(mp => {
+  mpState[mp.id] = {filter:'tous', search:'', sortCol:'ecartPct', sortDir:-1, page:1};
+});
+
+// ── UTILS ──
 function isExclu(g){const s=(g||'').toLowerCase();return s.includes('seconde main')||s.includes('warehouse')||s.includes('renewed');}
-function setLoading(msg){document.getElementById('loadingMsg').textContent=msg||'Chargement…';}
+function setMsg(m){document.getElementById('loadingMsg').textContent=m;}
 
-async function fetchSheet(id, sheetName){
+async function fetchGSheet(id, sheetName){
   const urls=[
     `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&headers=1`,
     `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&headers=1`
   ];
   for(const url of urls){
     try{
-      const res=await fetch(url,{cache:'no-store'});
-      if(!res.ok)continue;
-      const text=await res.text();
-      let jsonStr=text;
-      const m1=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
-      if(m1)jsonStr=m1[1];
-      else{const m2=text.match(/\/\*O_o\*\/\s*[\w.]+\s*\(([\s\S]*)\)/);if(m2)jsonStr=m2[1];}
-      const json=JSON.parse(jsonStr);
-      if(json?.table?.rows?.length)return json.table;
+      const r=await fetch(url,{cache:'no-store'});if(!r.ok)continue;
+      const t=await r.text();let js=t;
+      const m1=t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
+      if(m1)js=m1[1];else{const m2=t.match(/\/\*O_o\*\/\s*[\w.]+\s*\(([\s\S]*)\)/);if(m2)js=m2[1];}
+      const j=JSON.parse(js);if(j?.table?.rows?.length)return j.table;
     }catch(e){console.warn(url,e.message);}
   }
   return null;
 }
 
-async function chargerDonnees(){
+function parseRows(table){
+  if(!table)return[];
+  return table.rows.map(row=>{
+    const v=row.c;
+    const gs=(i)=>v[i]?.f!=null?String(v[i].f):(v[i]?.v!=null?String(v[i].v):'');
+    const gn=(i)=>parseFloat(v[i]?.v)||0;
+    const horodatage=gs(0),date=gs(1);
+    let heure=gs(2);
+    if(heure.includes('AM')||heure.includes('PM')){const d=new Date('1970-01-01 '+heure);heure=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+    if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
+    const sku=gs(3);
+    const meta=skuMeta[sku]||{ref:'—',marque:'—',fournisseur:'—'};
+    return{horodatage,date,heure,sku,ref:meta.ref,marque:meta.marque,fournisseur:meta.fournisseur,gagnant:gs(4),prixBB:gn(5),prixClient:gn(6),ecartEur:gn(7),ecartPct:gn(8),estGagnant:gs(9).toUpperCase()==='OUI'};
+  }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
+}
+
+// ── CHARGEMENT ──
+async function chargerTout(){
   document.getElementById('loadingView').style.display='flex';
-  document.getElementById('dashboard').style.display='none';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('errorView').style.display='none';
 
-  // Catalogue : SKU → marque (col J = index 9) + fournisseur (col O = index 14)
-  setLoading('Chargement du catalogue…');
-  const catTable = await fetchSheet(SHEET_CAT,'Sheet1');
+  // Catalogue
+  setMsg('Chargement du catalogue produits…');
+  const cat = await fetchGSheet(SHEET_CAT,'Sheet1');
   skuMeta={};
-  if(catTable){
-    catTable.rows.forEach(row=>{
-      const v=row.c;
-      const gs=(i)=>v[i]?.f!=null?String(v[i].f).trim():(v[i]?.v!=null?String(v[i].v).trim():'');
-      const sku=gs(0);
-      if(!sku)return;
-      skuMeta[sku]={marque:gs(9)||'—', fournisseur:gs(14)||'—'};
-    });
+  if(cat){cat.rows.forEach(row=>{
+    const v=row.c;
+    const gs=(i)=>v[i]?.f!=null?String(v[i].f).trim():(v[i]?.v!=null?String(v[i].v).trim():'');
+    const sku=gs(0);if(!sku)return;
+    // col A=0 SKU, col D=3 Référence, col J=9 Marque, col O=14 Fournisseur
+    skuMeta[sku]={ref:gs(3)||'—', marque:gs(9)||'—', fournisseur:gs(14)||'—'};
+  });}
+
+  // Données par marketplace
+  let ok=false;
+  for(const mp of MARKETPLACES){
+    setMsg('Chargement '+mp.nom+'…');
+    const table = await fetchGSheet(SHEET_ID, mp.onglet);
+    mpData[mp.id] = table ? parseRows(table) : [];
+    if(mpData[mp.id].length>0)ok=true;
   }
 
-  // BuyBox data
-  setLoading('Chargement des données BuyBox…');
-  const bbTable = await fetchSheet(SHEET_BB, SHEET_NAME);
-  if(!bbTable||!bbTable.rows.length){
+  if(!ok){
     document.getElementById('loadingView').style.display='none';
     document.getElementById('errorView').style.display='block';
     return;
   }
 
-  allData=bbTable.rows.map(row=>{
-    const v=row.c;
-    const gs=(i)=>v[i]?.f!=null?String(v[i].f):(v[i]?.v!=null?String(v[i].v):'');
-    const gn=(i)=>parseFloat(v[i]?.v)||0;
-    const horodatage=gs(0), date=gs(1);
-    let heure=gs(2);
-    if(heure.includes('AM')||heure.includes('PM')){const d=new Date('1970-01-01 '+heure);heure=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
-    if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
-    const sku=gs(3);
-    const meta=skuMeta[sku]||skuMeta[sku.replace(/^0+/,'')]||{marque:'—',fournisseur:'—'};
-    return{horodatage,date,heure,sku,marque:meta.marque,fournisseur:meta.fournisseur,gagnant:gs(4),prixBB:gn(5),prixClient:gn(6),ecartEur:gn(7),ecartPct:gn(8),estGagnant:gs(9).toUpperCase()==='OUI'};
-  }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
+  construireMarques();
+  rendreSelectLettres('acc-selectLettre','acc-selectMarque');
+  MARKETPLACES.forEach(mp=>rendreSelectLettres(mp.id+'-selectLettre',mp.id+'-selectMarque'));
 
   document.getElementById('loadingView').style.display='none';
-  document.getElementById('dashboard').style.display='block';
   document.getElementById('lastUpdate').textContent='Mis à jour '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 
-  construireIndexMarques();
-  rendreSelectLettre();
-  rendreKPIs();
-  rendreCharts();
-  rendreHeatmap();
-  appliquerFiltre();
+  rendrePageAccueil();
+  MARKETPLACES.forEach(mp=>rendrePageMP(mp));
+  allerPage('accueil', document.querySelector('.nav-tab'));
 }
 
-/* ── DOUBLE DROPDOWN MARQUES ── */
-function construireIndexMarques(){
-  const marques=[...new Set(allData.map(r=>r.marque).filter(m=>m&&m!=='—'))].sort();
+// ── MARQUES ──
+function construireMarques(){
+  const all=[...new Set(Object.values(mpData).flat().map(r=>r.marque).filter(m=>m&&m!=='—'))].sort();
   marquesParLettre={};
-  marques.forEach(m=>{
-    const l=m[0].toUpperCase();
-    if(!marquesParLettre[l])marquesParLettre[l]=[];
-    marquesParLettre[l].push(m);
-  });
+  all.forEach(m=>{const l=m[0].toUpperCase();if(!marquesParLettre[l])marquesParLettre[l]=[];if(!marquesParLettre[l].includes(m))marquesParLettre[l].push(m);});
 }
 
-function rendreSelectLettre(){
-  const sel=document.getElementById('selectLettre');
+function rendreSelectLettres(idL, idM){
+  const sel=document.getElementById(idL);if(!sel)return;
   const lettres=Object.keys(marquesParLettre).sort();
   sel.innerHTML='<option value="">— Lettre —</option>'+lettres.map(l=>`<option value="${l}">${l} (${marquesParLettre[l].length})</option>`).join('');
 }
 
-function onLetterChange(){
-  const lettre=document.getElementById('selectLettre').value;
-  const selMarque=document.getElementById('selectMarque');
-  if(!lettre){
-    selMarque.innerHTML='<option value="">— Marque —</option>';
-    selMarque.disabled=true;
-    resetBrand();
-    return;
-  }
-  const marques=marquesParLettre[lettre]||[];
-  selMarque.innerHTML='<option value="">— Marque —</option>'+marques.map(m=>`<option value="${m}">${m}</option>`).join('');
-  selMarque.disabled=false;
-  // Si une seule marque sur cette lettre, on sélectionne directement
-  if(marques.length===1){
-    selMarque.value=marques[0];
-    onBrandChange();
-  }
+function onLetterChange(idL,idM,onBrand){
+  const lettre=document.getElementById(idL).value;
+  const selM=document.getElementById(idM);
+  if(!lettre){selM.innerHTML='<option value="">— Marque —</option>';selM.disabled=true;return;}
+  const mqs=marquesParLettre[lettre]||[];
+  selM.innerHTML='<option value="">— Marque —</option>'+mqs.map(m=>`<option value="${m}">${m}</option>`).join('');
+  selM.disabled=false;
+  if(mqs.length===1){selM.value=mqs[0];onBrand();}
 }
 
-function onBrandChange(){
-  const marque=document.getElementById('selectMarque').value;
-  if(!marque){resetBrand();return;}
-  currentBrand=marque;
-  document.getElementById('brandActiveLabel').textContent=marque;
-  document.getElementById('brandActiveTag').style.display='flex';
-  rafraichirDashboard();
+function onBrandChange(idM, tagId, labelId, refreshFn){
+  const m=document.getElementById(idM).value;
+  if(!m){refreshFn('');return;}
+  document.getElementById(labelId).textContent=m;
+  document.getElementById(tagId).style.display='flex';
+  refreshFn(m);
 }
 
-function resetBrand(){
-  currentBrand='';
-  document.getElementById('selectLettre').value='';
-  document.getElementById('selectMarque').innerHTML='<option value="">— Marque —</option>';
-  document.getElementById('selectMarque').disabled=true;
-  document.getElementById('brandActiveTag').style.display='none';
-  rafraichirDashboard();
+function resetBrand(idL,idM,tagId,refreshFn){
+  document.getElementById(idL).value='';
+  document.getElementById(idM).innerHTML='<option value="">— Marque —</option>';
+  document.getElementById(idM).disabled=true;
+  document.getElementById(tagId).style.display='none';
+  refreshFn('');
 }
 
-function rafraichirDashboard(){
-  rendreKPIs();rendreCharts();rendreHeatmap();appliquerFiltre();
+// Accueil brand
+function accOnLetter(){onLetterChange('acc-selectLettre','acc-selectMarque',accOnBrand);}
+function accOnBrand(){
+  const m=document.getElementById('acc-selectMarque').value;
+  if(!m){accResetBrand();return;}
+  document.getElementById('acc-brandLabel').textContent=m;
+  document.getElementById('acc-brandTag').style.display='flex';
+  currentBrand=m;
+  rendrePageAccueil();
+}
+function accResetBrand(){
+  document.getElementById('acc-selectLettre').value='';
+  document.getElementById('acc-selectMarque').innerHTML='<option value="">— Marque —</option>';
+  document.getElementById('acc-selectMarque').disabled=true;
+  document.getElementById('acc-brandTag').style.display='none';
+  currentBrand='';rendrePageAccueil();
 }
 
-function filtreMarque(data){
+// ── NAVIGATION ──
+function allerPage(id, tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  if(tab)tab.classList.add('active');
+  else document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
+  activePage=id;
+  filteredData=[];
+}
+
+// ── PAGE ACCUEIL ──
+function filtreMP(data){
   if(!currentBrand)return data;
   return data.filter(r=>r.marque===currentBrand);
 }
 
-function dernierSnapshot(){
-  if(!allData.length)return[];
-  const hs=[...new Set(allData.map(r=>r.horodatage))].sort();
-  const dernier=hs[hs.length-1];
-  return filtreMarque(allData.filter(r=>r.horodatage===dernier&&!isExclu(r.gagnant)));
+function dernierSnap(data){
+  const hs=[...new Set(data.map(r=>r.horodatage))].sort();
+  if(!hs.length)return[];
+  return filtreMP(data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)));
 }
 
-function rendreKPIs(){
-  const snap=dernierSnapshot();
+function calcStats(data){
+  const snap=dernierSnap(data);
   const total=new Set(snap.map(r=>r.sku)).size;
-  const gagnesUniq=new Set(snap.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+  const gagnes=new Set(snap.filter(r=>r.estGagnant).map(r=>r.sku)).size;
   const perdus=snap.filter(r=>!r.estGagnant&&r.ecartPct>10).length;
-  const taux=total>0?Math.round(gagnesUniq/total*100):0;
+  const taux=total>0?Math.round(gagnes/total*100):0;
+  return{total,gagnes,perdus,taux};
+}
+
+function rendrePageAccueil(){
+  const grid=document.getElementById('mpGrid');
+  grid.innerHTML='';
+  MARKETPLACES.forEach(mp=>{
+    const data=mpData[mp.id]||[];
+    const st=calcStats(data);
+    const barW=st.taux;
+    grid.innerHTML+=`
+    <div class="mp-card ${mp.cls}" onclick="allerPage('${mp.id}',null)">
+      <div class="mp-card-header">
+        <span class="mp-name">${mp.nom}</span>
+        <a class="mp-link" href="${mp.link}" target="_blank" onclick="event.stopPropagation()">Multiply ↗</a>
+      </div>
+      <div class="mp-taux">${st.taux}%</div>
+      <div class="mp-sub">Taux BuyBox${currentBrand?' · '+currentBrand:''}</div>
+      <div class="mp-bar"><div class="mp-bar-fill" style="width:${barW}%"></div></div>
+      <div class="mp-stats-row">
+        <div class="mp-stat"><div class="mp-stat-label">SKUs gagnés</div><div class="mp-stat-val" style="color:var(--c1)">${st.gagnes}</div></div>
+        <div class="mp-stat"><div class="mp-stat-label">Opportunités</div><div class="mp-stat-val" style="color:var(--c2)">${st.perdus}</div></div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>`;
+  });
+
+  // Chart barre comparatif
+  const labels=MARKETPLACES.map(mp=>mp.nom);
+  const taux=MARKETPLACES.map(mp=>calcStats(mpData[mp.id]||[]).taux);
+  const colors=MARKETPLACES.map(mp=>mp.color);
+  if(charts.ovBar)charts.ovBar.destroy();
+  charts.ovBar=new Chart(document.getElementById('chartOverviewBar'),{
+    type:'bar',
+    data:{labels,datasets:[{data:taux,backgroundColor:colors.map(c=>c+'bb'),borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:Math.min(100,Math.max(10,Math.ceil(Math.max(...taux)*1.3/5)*5)),ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},x:{ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:12,weight:'bold'}},grid:{display:false},border:{display:false}}}}
+  });
+
+  // Chart ligne évolution
+  const allDates=[...new Set(Object.values(mpData).flat().map(r=>r.date))].filter(Boolean).sort().slice(-14);
+  const datasets=MARKETPLACES.map(mp=>{
+    const data=allDates.map(date=>{
+      const lignes=filtreMP((mpData[mp.id]||[]).filter(r=>r.date===date&&!isExclu(r.gagnant)));
+      if(!lignes.length)return null;
+      const u=new Set(lignes.map(r=>r.sku)).size;
+      const g=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+      return u>0?Math.round(g/u*100):0;
+    });
+    return{label:mp.nom,data,borderColor:mp.color,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:mp.color,tension:0.4,spanGaps:true};
+  });
+  if(charts.ovLine)charts.ovLine.destroy();
+  charts.ovLine=new Chart(document.getElementById('chartOverviewLine'),{
+    type:'line',
+    data:{labels:allDates,datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},boxWidth:12}}},scales:{y:{min:0,ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},x:{ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:10},maxRotation:45},grid:{display:false},border:{display:false}}}}
+  });
+}
+
+// ── PAGE MARKETPLACE ──
+function rendrePageMP(mp){
+  const el=document.getElementById('page-'+mp.id);
+  el.innerHTML=`
+  <div class="container">
+    <div class="brand-bar">
+      <span class="brand-label">Marque :</span>
+      <select class="brand-select" id="${mp.id}-selectLettre" onchange="mpOnLetter('${mp.id}')"><option value="">— Lettre —</option></select>
+      <span class="brand-arrow">›</span>
+      <select class="brand-select" id="${mp.id}-selectMarque" onchange="mpOnBrand('${mp.id}')" disabled><option value="">— Marque —</option></select>
+      <div id="${mp.id}-brandTag" style="display:none" class="brand-active-tag">
+        <span id="${mp.id}-brandLabel"></span>
+        <span class="clear" onclick="mpResetBrand('${mp.id}')">✕</span>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-c1"><div class="kpi-label">Taux BuyBox</div><div class="kpi-value" id="${mp.id}-kpiTaux">—</div><div class="kpi-sub" id="${mp.id}-kpiSub">—</div><div class="kpi-glow"></div></div>
+      <div class="kpi-card kpi-c2"><div class="kpi-label">SKUs gagnés</div><div class="kpi-value" id="${mp.id}-kpiGagnes">—</div><div class="kpi-sub" id="${mp.id}-kpiGagnesSub">—</div><div class="kpi-glow"></div></div>
+      <div class="kpi-card kpi-c3"><div class="kpi-label">Opportunités &gt;10%</div><div class="kpi-value" id="${mp.id}-kpiPerdus">—</div><div class="kpi-sub" id="${mp.id}-kpiPerdusSub">—</div><div class="kpi-glow"></div></div>
+      <div class="kpi-card kpi-c4"><div class="kpi-label">Concurrent #1</div><div class="kpi-value" id="${mp.id}-kpiConc">—</div><div class="kpi-sub" id="${mp.id}-kpiConcSub">—</div><div class="kpi-glow"></div></div>
+    </div>
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>// Taux BuyBox par créneau horaire</span>
+          <a href="${mp.link}" target="_blank" style="font-size:11px;color:var(--muted);text-decoration:none;font-family:'Share Tech Mono',monospace;">Multiply ↗</a>
+        </div>
+        <div class="chart-wrap"><canvas id="${mp.id}-chartH"></canvas></div>
+      </div>
+      <div class="card" style="overflow-y:auto;max-height:300px;">
+        <div class="card-title">// Concurrents — % BuyBox &amp; évolution</div>
+        <div id="${mp.id}-concurrents"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">// Heatmap 7 jours</div>
+      <div id="${mp.id}-heatmap" class="heatmap-grid"></div>
+    </div>
+    <div class="card">
+      <div class="table-controls">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;font-weight:600;">// Dernier snapshot SKUs</div>
+          <div class="filter-tabs">
+            <button class="tab active" onclick="mpFiltrer('${mp.id}','tous',this)">Tous</button>
+            <button class="tab" onclick="mpFiltrer('${mp.id}','gagnes',this)">On gagne</button>
+            <button class="tab" onclick="mpFiltrer('${mp.id}','perdus',this)">On perd</button>
+            <button class="tab" onclick="mpFiltrer('${mp.id}','fort-ecart',this)">Écart &gt;20%</button>
+          </div>
+        </div>
+        <input class="search-box" type="text" placeholder="SKU / ref / marque…" oninput="mpSearch('${mp.id}',this.value)">
+      </div>
+      <table class="sku-table">
+        <thead><tr>
+          <th onclick="mpTrier('${mp.id}','sku')">SKU ↕</th>
+          <th onclick="mpTrier('${mp.id}','ref')">Référence ↕</th>
+          <th onclick="mpTrier('${mp.id}','marque')">Marque ↕</th>
+          <th onclick="mpTrier('${mp.id}','fournisseur')">Fournisseur ↕</th>
+          <th onclick="mpTrier('${mp.id}','gagnant')">Gagnant BuyBox ↕</th>
+          <th onclick="mpTrier('${mp.id}','prixBB')">Prix BB ↕</th>
+          <th onclick="mpTrier('${mp.id}','prixClient')">Notre prix ↕</th>
+          <th onclick="mpTrier('${mp.id}','ecartPct')">Écart % ↕</th>
+          <th>Statut</th>
+        </tr></thead>
+        <tbody id="${mp.id}-tbody"></tbody>
+      </table>
+      <div class="pagination" id="${mp.id}-pag"></div>
+    </div>
+  </div>`;
+
+  // Initialiser les selects marque pour cette page
+  rendreSelectLettres(mp.id+'-selectLettre', mp.id+'-selectMarque');
+  mpRefresh(mp.id);
+}
+
+// Brand per MP
+function mpOnLetter(id){onLetterChange(id+'-selectLettre',id+'-selectMarque',()=>mpOnBrand(id));}
+function mpOnBrand(id){
+  const m=document.getElementById(id+'-selectMarque').value;
+  if(!m){mpResetBrand(id);return;}
+  document.getElementById(id+'-brandLabel').textContent=m;
+  document.getElementById(id+'-brandTag').style.display='flex';
+  mpState[id].brand=m; mpRefresh(id);
+}
+function mpResetBrand(id){
+  document.getElementById(id+'-selectLettre').value='';
+  document.getElementById(id+'-selectMarque').innerHTML='<option value="">— Marque —</option>';
+  document.getElementById(id+'-selectMarque').disabled=true;
+  document.getElementById(id+'-brandTag').style.display='none';
+  mpState[id].brand=''; mpRefresh(id);
+}
+
+function mpFiltreMarque(id, data){
+  const b=mpState[id]?.brand||'';
+  if(!b)return data;
+  return data.filter(r=>r.marque===b);
+}
+
+function mpDernierSnap(id){
+  const data=mpData[id]||[];
+  const hs=[...new Set(data.map(r=>r.horodatage))].sort();
+  if(!hs.length)return[];
+  return mpFiltreMarque(id, data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)));
+}
+
+function mpRefresh(id){
+  const mp=MARKETPLACES.find(m=>m.id===id);
+  const data=mpData[id]||[];
+  const snap=mpDernierSnap(id);
+  const total=new Set(snap.map(r=>r.sku)).size;
+  const gagnes=new Set(snap.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+  const perdus=snap.filter(r=>!r.estGagnant&&r.ecartPct>10).length;
+  const taux=total>0?Math.round(gagnes/total*100):0;
   const comptage={};
   snap.filter(r=>!r.estGagnant&&!isExclu(r.gagnant)).forEach(r=>{comptage[r.gagnant]=(comptage[r.gagnant]||0)+1;});
   const top=Object.entries(comptage).sort((a,b)=>b[1]-a[1])[0];
-  const label=currentBrand?` · ${currentBrand}`:'';
-  document.getElementById('kpiTaux').textContent=taux+'%';
-  document.getElementById('kpiTauxSub').textContent=total+' SKUs analysés'+label;
-  document.getElementById('kpiGagnes').textContent=gagnesUniq;
-  document.getElementById('kpiGagnesSub').textContent='sur '+total+' SKUs actifs';
-  document.getElementById('kpiPerdus').textContent=perdus;
-  document.getElementById('kpiPerdusSub').textContent='opportunités de repricing';
-  document.getElementById('kpiConcurrent').textContent=top?top[0].slice(0,18):'—';
-  document.getElementById('kpiConcurrentSub').textContent=top?top[1]+' BuyBox':'';
-}
+  const brand=mpState[id]?.brand||'';
 
-function rendreCharts(){
+  _set(id+'-kpiTaux',taux+'%');
+  _set(id+'-kpiSub',total+' SKUs analysés'+(brand?' · '+brand:''));
+  _set(id+'-kpiGagnes',gagnes);
+  _set(id+'-kpiGagnesSub','sur '+total+' SKUs actifs');
+  _set(id+'-kpiPerdus',perdus);
+  _set(id+'-kpiPerdusSub','SKUs avec écart > 10%');
+  _set(id+'-kpiConc',top?top[0].slice(0,16):'—');
+  _set(id+'-kpiConcSub',top?top[1]+' BuyBox':'');
+
+  // Chart horaire
   const heures=['10','12','14','16','18','20'];
-  const base=filtreMarque(allData.filter(r=>!isExclu(r.gagnant)));
+  const base=mpFiltreMarque(id,(mpData[id]||[]).filter(r=>!isExclu(r.gagnant)));
   const tph=heures.map(h=>{
-    const lignes=base.filter(r=>r.heure&&r.heure.startsWith(h));
-    if(!lignes.length)return null;
-    const u=new Set(lignes.map(r=>r.sku)).size;
-    const g=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+    const l=base.filter(r=>r.heure&&r.heure.startsWith(h));
+    if(!l.length)return null;
+    const u=new Set(l.map(r=>r.sku)).size;
+    const g=new Set(l.filter(r=>r.estGagnant).map(r=>r.sku)).size;
     return u>0?Math.round(g/u*100):0;
   });
   const vals=tph.filter(v=>v!==null);
-  const yMax=vals.length?Math.min(100,Math.max(10,Math.ceil((Math.max(...vals)*1.25)/5)*5)):100;
-  if(charts.horaire)charts.horaire.destroy();
-  charts.horaire=new Chart(document.getElementById('chartHoraire'),{
+  const yMax=vals.length?Math.min(100,Math.max(10,Math.ceil(Math.max(...vals)*1.25/5)*5)):100;
+  const ck=id+'-chartH';
+  if(charts[ck])charts[ck].destroy();
+  charts[ck]=new Chart(document.getElementById(id+'-chartH'),{
     type:'bar',
-    data:{labels:heures.map(h=>h+'h'),datasets:[{label:'%',data:tph,backgroundColor:tph.map(v=>v===null?'rgba(255,255,255,0.03)':v>=50?'rgba(0,245,212,0.75)':v>=25?'rgba(247,127,0,0.75)':'rgba(247,37,133,0.75)'),borderRadius:8,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw!==null?c.raw+'%':'N/A'}}},scales:{y:{min:0,max:yMax,ticks:{color:'#6868aa',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},x:{ticks:{color:'#6868aa',font:{family:'Share Tech Mono',size:11}},grid:{display:false},border:{display:false}}}}
+    data:{labels:heures.map(h=>h+'h'),datasets:[{data:tph,backgroundColor:tph.map(v=>v===null?'rgba(255,255,255,0.03)':v>=50?mp.color+'cc':v>=25?'#f77f0099':'#f7258599'),borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:yMax,ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},x:{ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11}},grid:{display:false},border:{display:false}}}}
   });
-  rendreConcurrents();
-}
 
-function rendreConcurrents(){
-  const snaps=[...new Set(allData.map(r=>r.horodatage))].sort();
+  // Concurrents
+  const snaps=[...new Set(data.map(r=>r.horodatage))].sort();
   const dH=snaps[snaps.length-1];
   const aH=snaps.length>1?snaps[snaps.length-2]:null;
-  const snapD=filtreMarque(allData.filter(r=>r.horodatage===dH&&!isExclu(r.gagnant)));
-  const snapA=aH?filtreMarque(allData.filter(r=>r.horodatage===aH&&!isExclu(r.gagnant))):[];
+  const snapD=mpFiltreMarque(id,data.filter(r=>r.horodatage===dH&&!isExclu(r.gagnant)));
+  const snapA=aH?mpFiltreMarque(id,data.filter(r=>r.horodatage===aH&&!isExclu(r.gagnant))):[];
   const tD=new Set(snapD.map(r=>r.sku)).size;
   const tA=new Set(snapA.map(r=>r.sku)).size||tD;
   const cD={};snapD.filter(r=>!r.estGagnant).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
   cD['Super10count']=snapD.filter(r=>r.estGagnant).length;
   const cA={};snapA.filter(r=>!r.estGagnant).forEach(r=>{cA[r.gagnant]=(cA[r.gagnant]||0)+1;});
   cA['Super10count']=snapA.filter(r=>r.estGagnant).length;
-  const top=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  const maxV=top[0]?.[1]||1;
+  const topC=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const maxV=topC[0]?.[1]||1;
   const pal={'Super10count':'#00f5d4','Amazon.fr':'#f77f00'};
-  const p=['#4cc9f0','#f72585','#a8ff3e','#8338ec','#ff006e','#7209b7','#3a86ff','#fb5607','#ffbe0b','#06d6a0'];
-  let ci=0;const gc=(n)=>{if(!pal[n])pal[n]=p[ci++%p.length];return pal[n];};
-  const rows=top.map(([nom,nb])=>{
+  const palette=['#4cc9f0','#f72585','#a8ff3e','#8338ec','#ff006e','#7209b7','#3a86ff','#fb5607','#ffbe0b','#06d6a0'];
+  let ci=0;const gc=(n)=>{if(!pal[n])pal[n]=palette[ci++%palette.length];return pal[n];};
+  const rows=topC.map(([nom,nb])=>{
     const pct=tD>0?(nb/tD*100):0;
     const nbP=cA[nom]||0;const pctP=tA>0?(nbP/tA*100):0;
     const delta=pct-pctP;
     const evo=aH?(Math.abs(delta)<0.5?'<span class="evo-flat">—</span>':delta>0?`<span class="evo-up">▲ +${delta.toFixed(1)}%</span>`:`<span class="evo-down">▼ ${delta.toFixed(1)}%</span>`):'<span class="evo-flat">—</span>';
     const bp=Math.round(nb/maxV*100);const color=gc(nom);
-    const nomH=nom==='Super10count'?`<strong style="color:#00f5d4">Super10count</strong>`:(nom.length>20?nom.slice(0,18)+'…':nom);
-    return `<tr><td>${nomH}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${bp}%;background:${color}"></div></div><span style="color:${color};min-width:38px;text-align:right;font-size:11px">${pct.toFixed(1)}%</span></div></td><td style="text-align:right">${nb}</td><td style="text-align:right">${evo}</td></tr>`;
+    const nomH=nom==='Super10count'?`<strong style="color:var(--c1)">Super10count</strong>`:(nom.length>20?nom.slice(0,18)+'…':nom);
+    return `<tr><td>${nomH}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${bp}%;background:${color}"></div></div><span style="color:${color};min-width:38px;text-align:right">${pct.toFixed(1)}%</span></div></td><td style="text-align:right">${nb}</td><td style="text-align:right">${evo}</td></tr>`;
   }).join('');
-  document.getElementById('tableConcurrents').innerHTML=`<table class="conc-table"><thead><tr><th>Concurrent</th><th>% BuyBox</th><th style="text-align:right">SKUs</th><th style="text-align:right">Évol.</th></tr></thead><tbody>${rows}</tbody></table>${aH?`<div style="font-size:9px;color:var(--muted);padding:6px 10px">vs ${aH}</div>`:''}`;
-}
+  _set(id+'-concurrents',`<table class="conc-table"><thead><tr><th>Concurrent</th><th>% BuyBox</th><th style="text-align:right">SKUs</th><th style="text-align:right">Évol.</th></tr></thead><tbody>${rows}</tbody></table>${aH?`<div style="font-size:10px;color:var(--muted);padding:6px 10px;font-family:'Share Tech Mono',monospace">vs ${aH}</div>`:''}`,'html');
 
-function rendreHeatmap(){
-  const heures=['10','12','14','16','18','20'];
-  const base=filtreMarque(allData);
-  const dates=[...new Set(base.map(r=>r.date))].filter(Boolean).sort().slice(-7);
-  const grid=document.getElementById('heatmapGrid');
-  grid.innerHTML='';grid.style.gridTemplateColumns=`90px repeat(${heures.length},1fr)`;
-  grid.innerHTML+='<div class="hm-header"></div>';
-  heures.forEach(h=>{grid.innerHTML+=`<div class="hm-header">${h}h</div>`;});
-  dates.forEach(date=>{
-    grid.innerHTML+=`<div class="hm-row-label">${date}</div>`;
-    heures.forEach(h=>{
-      const l=base.filter(r=>r.date===date&&r.heure&&r.heure.startsWith(h));
-      if(!l.length){grid.innerHTML+=`<div class="hm-cell" style="background:rgba(255,255,255,0.02);color:#2a2a55">—</div>`;return;}
-      const u=new Set(l.map(r=>r.sku)).size;
-      const g=new Set(l.filter(r=>r.estGagnant).map(r=>r.sku)).size;
-      const t=Math.round(g/u*100);
-      const bg=t>=50?`rgba(0,245,212,${0.08+t/100*0.5})`:t>=25?`rgba(247,127,0,${0.08+t/100*0.4})`:`rgba(247,37,133,0.12)`;
-      const color=t>=50?'#00f5d4':t>=25?'#f77f00':'#f72585';
-      grid.innerHTML+=`<div class="hm-cell" style="background:${bg};color:${color}">${t}%</div>`;
+  // Heatmap
+  const hmBase=mpFiltreMarque(id,data);
+  const dates=[...new Set(hmBase.map(r=>r.date))].filter(Boolean).sort().slice(-7);
+  const grid=document.getElementById(id+'-heatmap');
+  if(grid){
+    grid.innerHTML='';grid.style.gridTemplateColumns=`90px repeat(6,1fr)`;
+    grid.innerHTML+='<div class="hm-header"></div>';
+    heures.forEach(h=>{grid.innerHTML+=`<div class="hm-header">${h}h</div>`;});
+    dates.forEach(date=>{
+      grid.innerHTML+=`<div class="hm-row-label">${date}</div>`;
+      heures.forEach(h=>{
+        const l=hmBase.filter(r=>r.date===date&&r.heure&&r.heure.startsWith(h));
+        if(!l.length){grid.innerHTML+=`<div class="hm-cell" style="background:rgba(255,255,255,0.02);color:#2a2a55">—</div>`;return;}
+        const u=new Set(l.map(r=>r.sku)).size;const g=new Set(l.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+        const t=Math.round(g/u*100);
+        const bg=t>=50?`rgba(0,245,212,${0.08+t/100*0.5})`:t>=25?`rgba(247,127,0,${0.08+t/100*0.4})`:`rgba(247,37,133,0.12)`;
+        const color=t>=50?'#00f5d4':t>=25?'#f77f00':'#f72585';
+        grid.innerHTML+=`<div class="hm-cell" style="background:${bg};color:${color}">${t}%</div>`;
+      });
     });
-  });
-}
-
-function appliquerFiltre(){
-  const snap=dernierSnapshot();let data=[...snap];
-  if(currentFilter==='gagnes')data=data.filter(r=>r.estGagnant);
-  else if(currentFilter==='perdus')data=data.filter(r=>!r.estGagnant);
-  else if(currentFilter==='amazon')data=data.filter(r=>r.gagnant.toLowerCase().includes('amazon.fr')&&!r.gagnant.toLowerCase().includes('seconde'));
-  else if(currentFilter==='fort-ecart')data=data.filter(r=>r.ecartPct>20&&!r.estGagnant);
-  if(currentSearch){
-    const q=currentSearch.toLowerCase();
-    data=data.filter(r=>r.sku.toLowerCase().includes(q)||r.gagnant.toLowerCase().includes(q)||r.marque.toLowerCase().includes(q)||r.fournisseur.toLowerCase().includes(q));
   }
-  data.sort((a,b)=>{let va=a[sortCol],vb=b[sortCol];if(typeof va==='string')return sortDir*va.localeCompare(vb);return sortDir*(va-vb);});
-  filteredData=data;currentPage=1;rendrePage();
+
+  mpAppliquerFiltre(id);
 }
 
-function rendrePage(){
-  const start=(currentPage-1)*PAGE_SIZE;
-  const page=filteredData.slice(start,start+PAGE_SIZE);
-  const tbody=document.getElementById('tableBody');
+function mpAppliquerFiltre(id){
+  const st=mpState[id];
+  let data=[...mpDernierSnap(id)];
+  if(st.filter==='gagnes')data=data.filter(r=>r.estGagnant);
+  else if(st.filter==='perdus')data=data.filter(r=>!r.estGagnant);
+  else if(st.filter==='fort-ecart')data=data.filter(r=>r.ecartPct>20&&!r.estGagnant);
+  if(st.search){const q=st.search.toLowerCase();data=data.filter(r=>r.sku.toLowerCase().includes(q)||r.ref.toLowerCase().includes(q)||r.gagnant.toLowerCase().includes(q)||r.marque.toLowerCase().includes(q)||r.fournisseur.toLowerCase().includes(q));}
+  data.sort((a,b)=>{let va=a[st.sortCol],vb=b[st.sortCol];if(typeof va==='string')return st.sortDir*va.localeCompare(vb);return st.sortDir*(va-vb);});
+  if(activePage===id)filteredData=data;
+  mpState[id].data=data;
+  st.page=1;
+  mpRendrePage(id);
+}
+
+function mpRendrePage(id){
+  const st=mpState[id];
+  const PAGE=30;
+  const page=(st.data||[]).slice((st.page-1)*PAGE, st.page*PAGE);
+  const tbody=document.getElementById(id+'-tbody');
+  if(!tbody)return;
   tbody.innerHTML=page.map(r=>{
-    const ecartCls=r.ecartPct>20?'ecart-pos':r.ecartPct<0?'ecart-neg':'ecart-neu';
-    const statut=r.estGagnant?'<span class="badge badge-win">ON GAGNE</span>':r.gagnant.toLowerCase().includes('amazon.fr')?`<span class="badge badge-amazon">${r.gagnant.length>16?r.gagnant.slice(0,14)+'…':r.gagnant}</span>`:`<span class="badge badge-lose">${r.gagnant.length>16?r.gagnant.slice(0,14)+'…':r.gagnant}</span>`;
-    const marqueTag=r.marque&&r.marque!=='—'?`<span class="brand-tag">${r.marque}</span>`:'<span style="color:var(--muted)">—</span>';
-    const supplierTag=r.fournisseur&&r.fournisseur!=='—'?`<span class="supplier-tag">${r.fournisseur}</span>`:'<span style="color:var(--muted)">—</span>';
-    return `<tr>
-      <td>${r.sku}</td>
-      <td>${marqueTag}</td>
-      <td>${supplierTag}</td>
-      <td style="color:var(--muted);font-size:11px">${r.gagnant.length>22?r.gagnant.slice(0,20)+'…':r.gagnant}</td>
-      <td>${r.prixBB>0?r.prixBB.toFixed(2)+' €':'—'}</td>
-      <td>${r.prixClient>0?r.prixClient.toFixed(2)+' €':'—'}</td>
-      <td class="${ecartCls}">${r.ecartPct>0?'+':''}${r.ecartPct.toFixed(1)}%</td>
-      <td>${statut}</td>
-    </tr>`;
+    const cls=r.ecartPct>20?'ecart-pos':r.ecartPct<0?'ecart-neg':'ecart-neu';
+    const statut=r.estGagnant?'<span class="badge badge-win">ON GAGNE</span>':r.gagnant.toLowerCase().includes('amazon.fr')?`<span class="badge badge-amazon">${r.gagnant.length>14?r.gagnant.slice(0,12)+'…':r.gagnant}</span>`:`<span class="badge badge-lose">${r.gagnant.length>14?r.gagnant.slice(0,12)+'…':r.gagnant}</span>`;
+    const refTag=r.ref&&r.ref!=='—'?`<span class="ref-tag">${r.ref}</span>`:'<span style="color:var(--muted)">—</span>';
+    const mTag=r.marque&&r.marque!=='—'?`<span class="brand-tag">${r.marque}</span>`:'<span style="color:var(--muted)">—</span>';
+    const sTag=r.fournisseur&&r.fournisseur!=='—'?`<span class="supplier-tag">${r.fournisseur}</span>`:'<span style="color:var(--muted)">—</span>';
+    return `<tr><td>${r.sku}</td><td>${refTag}</td><td>${mTag}</td><td>${sTag}</td><td style="color:var(--muted);font-size:12px">${r.gagnant.length>20?r.gagnant.slice(0,18)+'…':r.gagnant}</td><td>${r.prixBB>0?r.prixBB.toFixed(2)+' €':'—'}</td><td>${r.prixClient>0?r.prixClient.toFixed(2)+' €':'—'}</td><td class="${cls}">${r.ecartPct>0?'+':''}${r.ecartPct.toFixed(1)}%</td><td>${statut}</td></tr>`;
   }).join('');
-  const tp=Math.ceil(filteredData.length/PAGE_SIZE);
-  const pag=document.getElementById('pagination');
+  const tp=Math.ceil((st.data||[]).length/PAGE);
+  const pag=document.getElementById(id+'-pag');
+  if(!pag)return;
   if(tp<=1){pag.innerHTML='';return;}
-  let html=`<span class="page-info">${filteredData.length} SKUs</span>`;
-  for(let i=1;i<=Math.min(tp,8);i++)html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
-  pag.innerHTML=html;
+  let h=`<span class="page-info">${(st.data||[]).length} SKUs</span>`;
+  for(let i=1;i<=Math.min(tp,8);i++)h+=`<button class="page-btn ${i===st.page?'active':''}" onclick="mpGoPage('${id}',${i})">${i}</button>`;
+  pag.innerHTML=h;
 }
 
-function goPage(n){currentPage=n;rendrePage();}
-function filtrer(f,btn){currentFilter=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');appliquerFiltre();}
-function rechercherSKU(v){currentSearch=v;appliquerFiltre();}
-function trierPar(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}appliquerFiltre();}
+function mpGoPage(id,n){mpState[id].page=n;mpRendrePage(id);}
+function mpFiltrer(id,f,btn){mpState[id].filter=f;document.querySelectorAll(`#page-${id} .tab`).forEach(t=>t.classList.remove('active'));btn.classList.add('active');mpAppliquerFiltre(id);}
+function mpSearch(id,v){mpState[id].search=v;mpAppliquerFiltre(id);}
+function mpTrier(id,col){if(mpState[id].sortCol===col)mpState[id].sortDir*=-1;else{mpState[id].sortCol=col;mpState[id].sortDir=-1;}mpAppliquerFiltre(id);}
 
+// ── HELPER ──
+function _set(id,val,mode){const el=document.getElementById(id);if(!el)return;if(mode==='html')el.innerHTML=val;else el.textContent=val;}
 
+// ── EXPORT EXCEL ──
 function exporterExcel(){
-  if(!filteredData.length){alert('Aucune donnée à exporter. Appliquez un filtre d\'abord.');return;}
-
-  // Onglet 1 : résultat du filtre actuel
-  const snap = dernierSnapshot();
-  const lignesFiltrees = filteredData.map(r=>({
-    'SKU': r.sku,
-    'Marque': r.marque,
-    'Fournisseur': r.fournisseur,
-    'Gagnant BuyBox': r.gagnant,
-    'Prix BuyBox (€)': r.prixBB,
-    'Notre prix (€)': r.prixClient,
-    'Écart (€)': r.ecartEur,
-    'Écart (%)': r.ecartPct,
-    'Super10count gagnant': r.estGagnant ? 'OUI' : 'NON',
-    'Snapshot': r.horodatage
-  }));
-
-  // Onglet 2 : analyse concurrents (dernier snapshot)
-  const snaps=[...new Set(allData.map(r=>r.horodatage))].sort();
-  const dH=snaps[snaps.length-1];
-  const snapD=filtreMarque(allData.filter(r=>r.horodatage===dH&&!isExclu(r.gagnant)));
-  const totalD=new Set(snapD.map(r=>r.sku)).size;
-  const cD={};
-  snapD.filter(r=>!r.estGagnant).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
-  cD['Super10count']=snapD.filter(r=>r.estGagnant).length;
-  const lignesConcurrents = Object.entries(cD)
-    .sort((a,b)=>b[1]-a[1])
-    .map(([nom,nb])=>({
-      'Concurrent': nom,
-      'Nb SKUs BuyBox': nb,
-      '% BuyBox': totalD>0?parseFloat((nb/totalD*100).toFixed(1)):0
-    }));
-
-  // Onglet 3 : tous les SKUs avec marque + fournisseur (vue complète)
-  const allSnap = dernierSnapshot();
-  const lignesAll = allSnap.map(r=>({
-    'SKU': r.sku,
-    'Marque': r.marque,
-    'Fournisseur': r.fournisseur,
-    'Gagnant BuyBox': r.gagnant,
-    'Prix BuyBox (€)': r.prixBB,
-    'Notre prix (€)': r.prixClient,
-    'Écart (%)': r.ecartPct,
-    'Statut': r.estGagnant ? 'GAGNE' : 'PERDU'
-  }));
-
-  const wb = XLSX.utils.book_new();
-
-  const ws1 = XLSX.utils.json_to_sheet(lignesFiltrees);
-  _styleSheet(ws1, lignesFiltrees.length);
-  XLSX.utils.book_append_sheet(wb, ws1, 'Filtre actuel');
-
-  const ws2 = XLSX.utils.json_to_sheet(lignesConcurrents);
-  _styleSheet(ws2, lignesConcurrents.length);
-  XLSX.utils.book_append_sheet(wb, ws2, 'Concurrents BuyBox');
-
-  const ws3 = XLSX.utils.json_to_sheet(lignesAll);
-  _styleSheet(ws3, lignesAll.length);
-  XLSX.utils.book_append_sheet(wb, ws3, 'Snapshot complet');
-
-  const date = new Date().toISOString().slice(0,10);
-  const marqueLabel = currentBrand ? '_'+currentBrand.replace(/[^a-zA-Z0-9]/g,'') : '';
-  XLSX.writeFile(wb, `BuyBox_Super10count${marqueLabel}_${date}.xlsx`);
-}
-
-function _styleSheet(ws, nbRows){
-  // Largeurs de colonnes
-  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
-  const cols = [];
-  for(let c=range.s.c; c<=range.e.c; c++){
-    let maxW=10;
-    for(let r=range.s.r; r<=range.e.r; r++){
-      const cell = ws[XLSX.utils.encode_cell({r,c})];
-      if(cell&&cell.v) maxW=Math.max(maxW, String(cell.v).length+2);
-    }
-    cols.push({wch:Math.min(maxW,40)});
+  const mp=MARKETPLACES.find(m=>m.id===activePage);
+  const data=mp?(mpState[mp.id]?.data||mpDernierSnap(mp.id)):[];
+  if(!data.length&&activePage==='accueil'){
+    // Export synthèse toutes MP
+    const wb=XLSX.utils.book_new();
+    MARKETPLACES.forEach(m=>{
+      const rows=mpDernierSnap(m.id).map(r=>({'SKU':r.sku,'Référence':r.ref,'Marque':r.marque,'Fournisseur':r.fournisseur,'Gagnant BuyBox':r.gagnant,'Prix BB (€)':r.prixBB,'Notre prix (€)':r.prixClient,'Écart (%)':r.ecartPct,'Statut':r.estGagnant?'GAGNE':'PERDU'}));
+      if(rows.length)XLSX.utils.book_append_sheet(wb,_ws(rows),m.nom);
+    });
+    XLSX.writeFile(wb,`BuyBox_Synthese_${_today()}.xlsx`);
+    return;
   }
-  ws['!cols']=cols;
+  const wb=XLSX.utils.book_new();
+  const rows=data.map(r=>({'SKU':r.sku,'Référence':r.ref,'Marque':r.marque,'Fournisseur':r.fournisseur,'Gagnant BuyBox':r.gagnant,'Prix BB (€)':r.prixBB,'Notre prix (€)':r.prixClient,'Écart (€)':r.ecartEur,'Écart (%)':r.ecartPct,'Statut':r.estGagnant?'GAGNE':'PERDU','Snapshot':r.horodatage}));
+  XLSX.utils.book_append_sheet(wb,_ws(rows),'Filtre actuel');
+  // Onglet concurrents
+  if(mp){
+    const snap=mpDernierSnap(mp.id);
+    const tD=new Set(snap.map(r=>r.sku)).size;
+    const cD={};snap.filter(r=>!r.estGagnant&&!isExclu(r.gagnant)).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
+    cD['Super10count']=snap.filter(r=>r.estGagnant).length;
+    const rowsC=Object.entries(cD).sort((a,b)=>b[1]-a[1]).map(([nom,nb])=>({'Concurrent':nom,'Nb SKUs':nb,'% BuyBox':tD>0?parseFloat((nb/tD*100).toFixed(1)):0}));
+    XLSX.utils.book_append_sheet(wb,_ws(rowsC),'Concurrents');
+  }
+  const label=(mp?'_'+mp.nom:'')+(currentBrand?'_'+currentBrand.replace(/[^a-zA-Z0-9]/g,''):'');
+  XLSX.writeFile(wb,`BuyBox_Super10count${label}_${_today()}.xlsx`);
 }
 
-chargerDonnees();
-setInterval(chargerDonnees,5*60*1000);
+function _ws(rows){const ws=XLSX.utils.json_to_sheet(rows);const r=XLSX.utils.decode_range(ws['!ref']||'A1');const cols=[];for(let c=r.s.c;c<=r.e.c;c++){let m=10;for(let row=r.s.r;row<=r.e.r;row++){const cell=ws[XLSX.utils.encode_cell({r:row,c})];if(cell?.v)m=Math.max(m,String(cell.v).length+2);}cols.push({wch:Math.min(m,40)});}ws['!cols']=cols;return ws;}
+function _today(){return new Date().toISOString().slice(0,10);}
+
+// ── INIT ──
+chargerTout();
+setInterval(chargerTout,10*60*1000);
 </script>
 </body>
 </html>
