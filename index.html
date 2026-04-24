@@ -356,40 +356,46 @@ async function chargerTout(){
   const cat = await fetchGSheet(SHEET_CAT,'Sheet1');
   skuMeta={};
   if(cat){
-    // Détecter si la première ligne est un en-tête (contient du texte non numérique en col A)
-    const firstRow=cat.rows[0];
-    const firstVal=firstRow?.c?.[0]?.v!=null?String(firstRow.c[0].v).trim():'';
-    const startIdx=isNaN(firstVal)&&firstVal!==''?1:0; // skip header si col A est texte
-    cat.rows.slice(startIdx).forEach(row=>{
+    // Lire les en-têtes pour trouver les bons index
+    const headers=cat.cols.map(col=>(col.label||col.id||'').toLowerCase().trim());
+    console.log('En-têtes catalogue:', headers.slice(0,16));
+
+    // Trouver les index par nom d'en-tête
+    const iSKU   = headers.findIndex(h=>h==='id'||h==='sku'||h==='id produit');
+    const iRef   = headers.findIndex(h=>h.includes('f') && h.includes('rence') || h==='référence'||h==='reference'||h==='référence'||h==='ref');
+    const iMarque= headers.findIndex(h=>h.includes('marque')||h.includes('brand')||h.includes('fabricant'));
+    const iFourn = headers.findIndex(h=>h.includes('fournisseur')||h.includes('supplier'));
+
+    // Fallback sur les index hardcodés si non trouvés
+    const idxSKU  = iSKU   >= 0 ? iSKU   : 0;
+    const idxRef  = iRef   >= 0 ? iRef   : 3;
+    const idxMarq = iMarque>= 0 ? iMarque: 9;
+    const idxFour = iFourn >= 0 ? iFourn : 14;
+
+    console.log('Index détectés → SKU:'+idxSKU+' Ref:'+idxRef+' Marque:'+idxMarq+' Fourn:'+idxFour);
+
+    const gsVal=(v,i)=>{
+      if(!v||!v[i]||v[i].v==null)return'';
+      const val=v[i].v;
+      if(typeof val==='number') return String(Math.round(val));
+      return String(val).trim();
+    };
+
+    cat.rows.forEach(row=>{
       const v=row.c;
-      const gs=(i)=>{
-        if(!v||!v[i])return'';
-        const val=v[i].v;
-        const fmt=v[i].f;
-        if(val==null)return'';
-        // Si c'est un nombre, éviter la notation scientifique
-        if(typeof val==='number'){
-          // Convertir en entier string sans décimale ni notation scientifique
-          return String(Math.round(val));
-        }
-        // Sinon prendre la valeur brute (texte)
-        return String(val).trim();
-      };
-      // Nettoyer le SKU : supprimer .0 final, espaces, convertir en string propre
-      let sku=gs(0).trim().replace(/\.0$/,'');
+      let sku=gsVal(v,idxSKU).replace(/\.0$/,'').trim();
       if(!sku||sku==='')return;
-      // col A=0 SKU, col D=3 Référence, col J=9 Marque, col O=14 Fournisseur
-      const ref=gs(3).trim();
-      const marque=gs(9).trim();
-      const fournisseur=gs(14).trim();
+      const ref       = gsVal(v,idxRef);
+      const marque    = gsVal(v,idxMarq);
+      const fournisseur= gsVal(v,idxFour);
       skuMeta[sku]={ref:ref||'—', marque:marque||'—', fournisseur:fournisseur||'—'};
-      // Aussi indexer sans zéros initiaux au cas où
       const skuNum=String(parseInt(sku,10));
-      if(skuNum!==sku)skuMeta[skuNum]={ref:ref||'—', marque:marque||'—', fournisseur:fournisseur||'—'};
+      if(skuNum!==sku) skuMeta[skuNum]={ref:ref||'—', marque:marque||'—', fournisseur:fournisseur||'—'};
     });
+
     console.log('Catalogue chargé:', Object.keys(skuMeta).length,'SKUs');
-    // Debug premiers SKUs
-    const sample=Object.entries(skuMeta).slice(0,3);
+    console.log('Avec ref:', Object.values(skuMeta).filter(m=>m.ref!=='—').length,'SKUs');
+    const sample=Object.entries(skuMeta).filter(([s,m])=>m.ref!=='—').slice(0,3);
     sample.forEach(([s,m])=>console.log('SKU',s,'→',JSON.stringify(m)));
   }
 
