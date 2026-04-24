@@ -338,8 +338,9 @@ function parseRows(table){
     let heure=gs(2);
     if(heure.includes('AM')||heure.includes('PM')){const d=new Date('1970-01-01 '+heure);heure=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
     if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
-    const sku=gs(3);
-    const meta=skuMeta[sku]||{ref:'—',marque:'—',fournisseur:'—'};
+    const sku=gs(3).trim().replace(/\.0$/,'');
+    // Chercher avec et sans zéros initiaux
+    const meta=skuMeta[sku]||skuMeta[String(parseInt(sku,10))]||skuMeta[sku.replace(/^0+/,'')]||{ref:'—',marque:'—',fournisseur:'—'};
     return{horodatage,date,heure,sku,ref:meta.ref,marque:meta.marque,fournisseur:meta.fournisseur,gagnant:gs(4),prixBB:gn(5),prixClient:gn(6),ecartEur:gn(7),ecartPct:gn(8),estGagnant:gs(9).toUpperCase()==='OUI'||isSuper10(gs(4))};
   }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
 }
@@ -365,13 +366,17 @@ async function chargerTout(){
         if(!v||!v[i])return'';
         return v[i].f!=null?String(v[i].f).trim():v[i].v!=null?String(v[i].v).trim():'';
       };
-      const sku=gs(0);
-      if(!sku||sku===''||isNaN(sku.replace(/[^0-9]/g,'')))return;
+      // Nettoyer le SKU : supprimer .0 final, espaces, convertir en string propre
+      let sku=gs(0).trim().replace(/\.0$/,'');
+      if(!sku||sku==='')return;
       // col A=0 SKU, col D=3 Référence, col J=9 Marque, col O=14 Fournisseur
-      const ref=gs(3);
-      const marque=gs(9);
-      const fournisseur=gs(14);
+      const ref=gs(3).trim();
+      const marque=gs(9).trim();
+      const fournisseur=gs(14).trim();
       skuMeta[sku]={ref:ref||'—', marque:marque||'—', fournisseur:fournisseur||'—'};
+      // Aussi indexer sans zéros initiaux au cas où
+      const skuNum=String(parseInt(sku,10));
+      if(skuNum!==sku)skuMeta[skuNum]={ref:ref||'—', marque:marque||'—', fournisseur:fournisseur||'—'};
     });
     console.log('Catalogue chargé:', Object.keys(skuMeta).length,'SKUs');
     // Debug premiers SKUs
