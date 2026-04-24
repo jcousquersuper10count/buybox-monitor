@@ -639,6 +639,7 @@ function mpOnFourn(id){
   if(tag){tag.style.display='flex';}
   if(label)label.textContent=f;
   mpState[id].fournisseur=f;
+  mpRefreshGraphiques(id);
   mpAppliquerFiltre(id);
 }
 
@@ -648,6 +649,7 @@ function mpResetFourn(id){
   const tag=document.getElementById(id+'-fournTag');
   if(tag)tag.style.display='none';
   mpState[id].fournisseur='';
+  mpRefreshGraphiques(id);
   mpAppliquerFiltre(id);
 }
 
@@ -657,20 +659,27 @@ function mpOnBrand(id){
   if(!m){mpResetBrand(id);return;}
   document.getElementById(id+'-brandLabel').textContent=m;
   document.getElementById(id+'-brandTag').style.display='flex';
-  mpState[id].brand=m; mpRefresh(id);
+  mpState[id].brand=m;
+  mpRefreshGraphiques(id);
+  mpAppliquerFiltre(id);
 }
 function mpResetBrand(id){
   document.getElementById(id+'-selectLettre').value='';
   document.getElementById(id+'-selectMarque').innerHTML='<option value="">— Marque —</option>';
   document.getElementById(id+'-selectMarque').disabled=true;
   document.getElementById(id+'-brandTag').style.display='none';
-  mpState[id].brand=''; mpAppliquerFiltre(id);
+  mpState[id].brand='';
+  mpRefreshGraphiques(id);
+  mpAppliquerFiltre(id);
 }
 
 function mpFiltreMarque(id, data){
   const b=mpState[id]?.brand||'';
-  if(!b)return data;
-  return data.filter(r=>r.marque===b);
+  const f=mpState[id]?.fournisseur||'';
+  let d=data;
+  if(b)d=d.filter(r=>r.marque===b);
+  if(f)d=d.filter(r=>r.fournisseur===f);
+  return d;
 }
 
 function mpDernierSnap(id){
@@ -679,6 +688,106 @@ function mpDernierSnap(id){
   if(!hs.length)return[];
   // Filtrer : dernier snapshot + non exclu + fournisseur renseigné (produit en stock)
   return mpFiltreMarque(id, data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)&&r.fournisseur&&r.fournisseur!=='—'));
+}
+
+function mpRefreshGraphiques(id){
+  const mp=MARKETPLACES.find(m=>m.id===id);
+  if(!mp)return;
+  const data=mpData[id]||[];
+  const snap=mpDernierSnap(id);
+  const total=new Set(snap.map(r=>r.sku)).size;
+  const gagnes=new Set(snap.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+  const perdus=snap.filter(r=>!r.estGagnant&&r.ecartPct>10).length;
+  const taux=total>0?Math.round(gagnes/total*100):0;
+  const comptage={};
+  snap.filter(r=>!r.estGagnant&&!isExclu(r.gagnant)).forEach(r=>{comptage[r.gagnant]=(comptage[r.gagnant]||0)+1;});
+  const top=Object.entries(comptage).sort((a,b)=>b[1]-a[1])[0];
+  const brand=mpState[id]?.brand||'';
+  const fourn=mpState[id]?.fournisseur||'';
+  const subLabel=[total+' SKUs analysés', brand?'Marque : '+brand:'', fourn?'Fourn. : '+fourn:''].filter(Boolean).join(' · ');
+
+  _set(id+'-kpiTaux',taux+'%');
+  _set(id+'-kpiSub',subLabel);
+  _set(id+'-kpiGagnes',gagnes);
+  _set(id+'-kpiGagnesSub','sur '+total+' SKUs actifs');
+  _set(id+'-kpiPerdus',perdus);
+  _set(id+'-kpiPerdusSub','SKUs avec écart > 10%');
+  _set(id+'-kpiConc',top?top[0].slice(0,16):'—');
+  _set(id+'-kpiConcSub',top?top[1]+' BuyBox':'');
+
+  // Chart horaire — filtré marque + fournisseur
+  const heures=['10','12','14','16','18','20'];
+  const base=mpFiltreMarque(id,(mpData[id]||[]).filter(r=>!isExclu(r.gagnant)));
+  const tph=heures.map(h=>{
+    const l=base.filter(r=>r.heure&&r.heure.startsWith(h));
+    if(!l.length)return null;
+    const u=new Set(l.map(r=>r.sku)).size;
+    const g=new Set(l.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+    return u>0?Math.round(g/u*100):0;
+  });
+  const vals=tph.filter(v=>v!==null);
+  const yMax=vals.length?Math.min(100,Math.max(10,Math.ceil(Math.max(...vals)*1.25/5)*5)):100;
+  const ck=id+'-chartH';
+  if(charts[ck])charts[ck].destroy();
+  const canvas=document.getElementById(id+'-chartH');
+  if(canvas){
+    charts[ck]=new Chart(canvas,{
+      type:'bar',
+      data:{labels:heures.map(h=>h+'h'),datasets:[{data:tph,backgroundColor:tph.map(v=>v===null?'rgba(255,255,255,0.03)':v>=50?mp.color+'cc':v>=25?'#f77f0099':'#f7258599'),borderRadius:8,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:yMax,ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},x:{ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11}},grid:{display:false},border:{display:false}}}}
+    });
+  }
+
+  // Concurrents — filtré
+  const snaps=[...new Set(data.map(r=>r.horodatage))].sort();
+  const dH=snaps[snaps.length-1];
+  const aH=snaps.length>1?snaps[snaps.length-2]:null;
+  const snapD=mpFiltreMarque(id,data.filter(r=>r.horodatage===dH&&!isExclu(r.gagnant)));
+  const snapA=aH?mpFiltreMarque(id,data.filter(r=>r.horodatage===aH&&!isExclu(r.gagnant))):[];
+  const tD=new Set(snapD.map(r=>r.sku)).size;
+  const tA=new Set(snapA.map(r=>r.sku)).size||tD;
+  const cD={};snapD.filter(r=>!r.estGagnant).forEach(r=>{cD[r.gagnant]=(cD[r.gagnant]||0)+1;});
+  cD['Super10count']=snapD.filter(r=>r.estGagnant).length;
+  const cA={};snapA.filter(r=>!r.estGagnant).forEach(r=>{cA[r.gagnant]=(cA[r.gagnant]||0)+1;});
+  cA['Super10count']=snapA.filter(r=>r.estGagnant).length;
+  const topC=Object.entries(cD).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const maxV=topC[0]?.[1]||1;
+  const pal={'Super10count':'#00f5d4','Amazon.fr':'#f77f00'};
+  const palette=['#4cc9f0','#f72585','#a8ff3e','#8338ec','#ff006e','#7209b7','#3a86ff','#fb5607','#ffbe0b','#06d6a0'];
+  let ci=0;const gc=(n)=>{if(!pal[n])pal[n]=palette[ci++%palette.length];return pal[n];};
+  const rows=topC.map(([nom,nb])=>{
+    const pct=tD>0?(nb/tD*100):0;
+    const nbP=cA[nom]||0;const pctP=tA>0?(nbP/tA*100):0;
+    const delta=pct-pctP;
+    const evo=aH?(Math.abs(delta)<0.5?'<span class="evo-flat">—</span>':delta>0?`<span class="evo-up">▲ +${delta.toFixed(1)}%</span>`:`<span class="evo-down">▼ ${delta.toFixed(1)}%</span>`):'<span class="evo-flat">—</span>';
+    const bp=Math.round(nb/maxV*100);const color=gc(nom);
+    const nomH=nom==='Super10count'?`<strong style="color:var(--c1)">Super10count</strong>`:(nom.length>20?nom.slice(0,18)+'…':nom);
+    return `<tr><td>${nomH}</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${bp}%;background:${color}"></div></div><span style="color:${color};min-width:38px;text-align:right">${pct.toFixed(1)}%</span></div></td><td style="text-align:right">${nb}</td><td style="text-align:right">${evo}</td></tr>`;
+  }).join('');
+  const concEl=document.getElementById(id+'-concurrents');
+  if(concEl)concEl.innerHTML=`<table class="conc-table"><thead><tr><th>Concurrent</th><th>% BuyBox</th><th style="text-align:right">SKUs</th><th style="text-align:right">Évol.</th></tr></thead><tbody>${rows}</tbody></table>${aH?`<div style="font-size:10px;color:var(--muted);padding:6px 10px;font-family:'Share Tech Mono',monospace">vs ${aH}</div>`:''}`;
+
+  // Heatmap — filtrée
+  const hmBase=mpFiltreMarque(id,data);
+  const dates=[...new Set(hmBase.map(r=>r.date))].filter(Boolean).sort().slice(-7);
+  const grid=document.getElementById(id+'-heatmap');
+  if(grid){
+    grid.innerHTML='';grid.style.gridTemplateColumns=`90px repeat(6,1fr)`;
+    grid.innerHTML+='<div class="hm-header"></div>';
+    heures.forEach(h=>{grid.innerHTML+=`<div class="hm-header">${h}h</div>`;});
+    dates.forEach(date=>{
+      grid.innerHTML+=`<div class="hm-row-label">${date}</div>`;
+      heures.forEach(h=>{
+        const l=hmBase.filter(r=>r.date===date&&r.heure&&r.heure.startsWith(h));
+        if(!l.length){grid.innerHTML+=`<div class="hm-cell" style="background:rgba(255,255,255,0.02);color:#2a2a55">—</div>`;return;}
+        const u=new Set(l.map(r=>r.sku)).size;const g=new Set(l.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+        const t=Math.round(g/u*100);
+        const bg=t>=50?`rgba(0,245,212,${0.08+t/100*0.5})`:t>=25?`rgba(247,127,0,${0.08+t/100*0.4})`:`rgba(247,37,133,0.12)`;
+        const color=t>=50?'#00f5d4':t>=25?'#f77f00':'#f72585';
+        grid.innerHTML+=`<div class="hm-cell" style="background:${bg};color:${color}">${t}%</div>`;
+      });
+    });
+  }
 }
 
 function mpRefresh(id){
