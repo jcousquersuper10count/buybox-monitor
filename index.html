@@ -354,13 +354,30 @@ async function chargerTout(){
   setMsg('Chargement du catalogue produits…');
   const cat = await fetchGSheet(SHEET_CAT,'Sheet1');
   skuMeta={};
-  if(cat){cat.rows.forEach(row=>{
-    const v=row.c;
-    const gs=(i)=>v[i]?.f!=null?String(v[i].f).trim():(v[i]?.v!=null?String(v[i].v).trim():'');
-    const sku=gs(0);if(!sku)return;
-    // col A=0 SKU, col D=3 Référence, col J=9 Marque, col O=14 Fournisseur
-    skuMeta[sku]={ref:gs(3)||'—', marque:gs(9)||'—', fournisseur:gs(14)||'—'};
-  });}
+  if(cat){
+    // Détecter si la première ligne est un en-tête (contient du texte non numérique en col A)
+    const firstRow=cat.rows[0];
+    const firstVal=firstRow?.c?.[0]?.v!=null?String(firstRow.c[0].v).trim():'';
+    const startIdx=isNaN(firstVal)&&firstVal!==''?1:0; // skip header si col A est texte
+    cat.rows.slice(startIdx).forEach(row=>{
+      const v=row.c;
+      const gs=(i)=>{
+        if(!v||!v[i])return'';
+        return v[i].f!=null?String(v[i].f).trim():v[i].v!=null?String(v[i].v).trim():'';
+      };
+      const sku=gs(0);
+      if(!sku||sku===''||isNaN(sku.replace(/[^0-9]/g,'')))return;
+      // col A=0 SKU, col D=3 Référence, col J=9 Marque, col O=14 Fournisseur
+      const ref=gs(3);
+      const marque=gs(9);
+      const fournisseur=gs(14);
+      skuMeta[sku]={ref:ref||'—', marque:marque||'—', fournisseur:fournisseur||'—'};
+    });
+    console.log('Catalogue chargé:', Object.keys(skuMeta).length,'SKUs');
+    // Debug premiers SKUs
+    const sample=Object.entries(skuMeta).slice(0,3);
+    sample.forEach(([s,m])=>console.log('SKU',s,'→',JSON.stringify(m)));
+  }
 
   // Données par marketplace
   let ok=false;
