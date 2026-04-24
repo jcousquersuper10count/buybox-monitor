@@ -303,7 +303,7 @@ let charts = {};
 let filteredData = []; // pour export
 
 MARKETPLACES.forEach(mp => {
-  mpState[mp.id] = {filter:'tous', search:'', sortCol:'ecartPct', sortDir:-1, page:1};
+  mpState[mp.id] = {filter:'tous', search:'', sortCol:'ecartPct', sortDir:-1, page:1, brand:'', fournisseur:''};
 });
 
 // ── UTILS ──
@@ -552,6 +552,15 @@ function rendrePageMP(mp){
         <span id="${mp.id}-brandLabel"></span>
         <span class="clear" onclick="mpResetBrand('${mp.id}')">✕</span>
       </div>
+      <div style="width:1px;height:24px;background:var(--border);margin:0 4px"></div>
+      <span class="brand-label">Fournisseur :</span>
+      <select class="brand-select" id="${mp.id}-selectFourn" onchange="mpOnFourn('${mp.id}')">
+        <option value="">— Tous —</option>
+      </select>
+      <div id="${mp.id}-fournTag" style="display:none" class="brand-active-tag" style="border-color:rgba(168,255,62,0.3);background:rgba(168,255,62,0.08);">
+        <span id="${mp.id}-fournLabel" style="color:var(--c6)"></span>
+        <span class="clear" onclick="mpResetFourn('${mp.id}')">✕</span>
+      </div>
     </div>
     <div class="kpi-grid">
       <div class="kpi-card kpi-c1"><div class="kpi-label">Taux BuyBox</div><div class="kpi-value" id="${mp.id}-kpiTaux">—</div><div class="kpi-sub" id="${mp.id}-kpiSub">—</div><div class="kpi-glow"></div></div>
@@ -609,10 +618,39 @@ function rendrePageMP(mp){
 
   // Initialiser les selects marque pour cette page
   rendreSelectLettres(mp.id+'-selectLettre', mp.id+'-selectMarque');
+  rendreFournisseurs(mp.id);
   mpRefresh(mp.id);
 }
 
 // Brand per MP
+function rendreFournisseurs(id){
+  const data=mpData[id]||[];
+  const fourns=[...new Set(data.map(r=>r.fournisseur).filter(f=>f&&f!=='—'))].sort();
+  const sel=document.getElementById(id+'-selectFourn');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— Tous —</option>'+fourns.map(f=>`<option value="${f}">${f}</option>`).join('');
+}
+
+function mpOnFourn(id){
+  const f=document.getElementById(id+'-selectFourn').value;
+  if(!f){mpResetFourn(id);return;}
+  const tag=document.getElementById(id+'-fournTag');
+  const label=document.getElementById(id+'-fournLabel');
+  if(tag){tag.style.display='flex';}
+  if(label)label.textContent=f;
+  mpState[id].fournisseur=f;
+  mpAppliquerFiltre(id);
+}
+
+function mpResetFourn(id){
+  const sel=document.getElementById(id+'-selectFourn');
+  if(sel)sel.value='';
+  const tag=document.getElementById(id+'-fournTag');
+  if(tag)tag.style.display='none';
+  mpState[id].fournisseur='';
+  mpAppliquerFiltre(id);
+}
+
 function mpOnLetter(id){onLetterChange(id+'-selectLettre',id+'-selectMarque',()=>mpOnBrand(id));}
 function mpOnBrand(id){
   const m=document.getElementById(id+'-selectMarque').value;
@@ -626,7 +664,7 @@ function mpResetBrand(id){
   document.getElementById(id+'-selectMarque').innerHTML='<option value="">— Marque —</option>';
   document.getElementById(id+'-selectMarque').disabled=true;
   document.getElementById(id+'-brandTag').style.display='none';
-  mpState[id].brand=''; mpRefresh(id);
+  mpState[id].brand=''; mpAppliquerFiltre(id);
 }
 
 function mpFiltreMarque(id, data){
@@ -744,6 +782,7 @@ function mpAppliquerFiltre(id){
   if(st.filter==='gagnes')data=data.filter(r=>r.estGagnant);
   else if(st.filter==='perdus')data=data.filter(r=>!r.estGagnant);
   else if(st.filter==='fort-ecart')data=data.filter(r=>r.ecartPct>20&&!r.estGagnant);
+  if(st.fournisseur)data=data.filter(r=>r.fournisseur===st.fournisseur);
   if(st.search){const q=st.search.toLowerCase();data=data.filter(r=>r.sku.toLowerCase().includes(q)||r.ref.toLowerCase().includes(q)||r.gagnant.toLowerCase().includes(q)||r.marque.toLowerCase().includes(q)||r.fournisseur.toLowerCase().includes(q));}
   data.sort((a,b)=>{let va=a[st.sortCol],vb=b[st.sortCol];if(typeof va==='string')return st.sortDir*va.localeCompare(vb);return st.sortDir*(va-vb);});
   if(activePage===id)filteredData=data;
