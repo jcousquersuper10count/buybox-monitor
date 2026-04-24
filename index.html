@@ -753,7 +753,7 @@ function mpRefreshGraphiques(id){
   _set(id+'-kpiConcSub',top?top[1]+' BuyBox':'');
 
   // Chart horaire — filtré marque + fournisseur
-  // Stratégie : pour chaque créneau, prendre aujourd'hui si dispo, sinon hier
+  // Stratégie : pour chaque créneau, prendre auj. si dispo, sinon hier
   const heures=['10','12','14','16','18','20'];
   const base=mpFiltreMarque(id,(mpData[id]||[]).filter(r=>!isExclu(r.gagnant)));
   // Trouver les 2 dernières dates disponibles
@@ -762,10 +762,10 @@ function mpRefreshGraphiques(id){
   const dateHier=datesDispos[datesDispos.length-2]||'';
 
   const tph=heures.map(h=>{
-    // D'abord chercher aujourd'hui
+    // D'abord chercher auj.
     let l=base.filter(r=>r.date===dateAuj&&r.heure&&r.heure.startsWith(h));
     let source='auj';
-    // Si pas de données aujourd'hui pour ce créneau, prendre hier
+    // Si pas de données auj. pour ce créneau, prendre hier
     if(!l.length&&dateHier){
       l=base.filter(r=>r.date===dateHier&&r.heure&&r.heure.startsWith(h));
       source='hier';
@@ -799,7 +799,7 @@ function mpRefreshGraphiques(id){
         responsive:true,maintainAspectRatio:false,
         plugins:{
           legend:{display:false},
-          tooltip:{callbacks:{label:ctx=>{const t=tph[ctx.dataIndex];return t.val!==null?(t.val+'% '+(t.source==='hier'?'(hier)':'(aujourd'hui)')):'N/A';}}}
+          tooltip:{callbacks:{label:ctx=>{const t=tph[ctx.dataIndex];return t.val!==null?(t.val+'% '+(t.source==='hier'?'(hier)':'(auj.)')):'N/A';}}}
         },
         scales:{
           y:{min:0,max:yMax,ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},
