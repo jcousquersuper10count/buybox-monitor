@@ -62,7 +62,7 @@ nav{background:rgba(13,13,26,0.9);border-bottom:1px solid var(--border);position
 .mp-name{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;}
 .mp-link{font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--muted);text-decoration:none;transition:color 0.2s;}
 .mp-link:hover{color:var(--c1);}
-.mp-taux{font-size:48px;font-weight:800;line-height:1;margin-bottom:8px;}
+.mp-taux{font-size:48px;font-weight:800;line-height:1;margin-bottom:8px;position:relative;z-index:2;}
 .mp-sub{font-size:12px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
 .mp-bar{height:4px;background:rgba(255,255,255,0.07);border-radius:2px;margin-top:1.25rem;overflow:hidden;}
 .mp-bar-fill{height:100%;border-radius:2px;transition:width 0.6s ease;}
@@ -308,6 +308,7 @@ MARKETPLACES.forEach(mp => {
 
 // ── UTILS ──
 function isExclu(g){const s=(g||'').toLowerCase();return s.includes('seconde main')||s.includes('warehouse')||s.includes('renewed');}
+function isSuper10(g){const s=(g||'').toLowerCase();return s.includes('super10count')||s.includes('super 10count')||s.includes('candysud');}
 function setMsg(m){document.getElementById('loadingMsg').textContent=m;}
 
 async function fetchGSheet(id, sheetName){
@@ -339,7 +340,7 @@ function parseRows(table){
     if(!heure&&v[2]?.v){const m=String(v[2].v).match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);if(m)heure=m[1].padStart(2,'0')+':'+m[2].padStart(2,'0');}
     const sku=gs(3);
     const meta=skuMeta[sku]||{ref:'—',marque:'—',fournisseur:'—'};
-    return{horodatage,date,heure,sku,ref:meta.ref,marque:meta.marque,fournisseur:meta.fournisseur,gagnant:gs(4),prixBB:gn(5),prixClient:gn(6),ecartEur:gn(7),ecartPct:gn(8),estGagnant:gs(9).toUpperCase()==='OUI'};
+    return{horodatage,date,heure,sku,ref:meta.ref,marque:meta.marque,fournisseur:meta.fournisseur,gagnant:gs(4),prixBB:gn(5),prixClient:gn(6),ecartEur:gn(7),ecartPct:gn(8),estGagnant:gs(9).toUpperCase()==='OUI'||isSuper10(gs(4))};
   }).filter(r=>r.sku&&r.sku!=='SKU'&&r.sku!=='');
 }
 
@@ -465,7 +466,7 @@ function filtreMP(data){
 function dernierSnap(data){
   const hs=[...new Set(data.map(r=>r.horodatage))].sort();
   if(!hs.length)return[];
-  return filtreMP(data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)));
+  return filtreMP(data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)&&r.fournisseur&&r.fournisseur!=='—'));
 }
 
 function calcStats(data){
@@ -490,9 +491,9 @@ function rendrePageAccueil(){
         <span class="mp-name">${mp.nom}</span>
         <a class="mp-link" href="${mp.link}" target="_blank" onclick="event.stopPropagation()">Multiply ↗</a>
       </div>
-      <div class="mp-taux">${st.taux}%</div>
+      <div class="mp-taux" style="font-size:52px;font-weight:800;line-height:1.1;margin-bottom:6px">${st.taux}%</div>
       <div class="mp-sub">Taux BuyBox${currentBrand?' · '+currentBrand:''}</div>
-      <div class="mp-bar"><div class="mp-bar-fill" style="width:${barW}%"></div></div>
+      <div class="mp-bar" style="margin-top:12px"><div class="mp-bar-fill" style="width:${barW}%"></div></div>
       <div class="mp-stats-row">
         <div class="mp-stat"><div class="mp-stat-label">SKUs gagnés</div><div class="mp-stat-val" style="color:var(--c1)">${st.gagnes}</div></div>
         <div class="mp-stat"><div class="mp-stat-label">Opportunités</div><div class="mp-stat-val" style="color:var(--c2)">${st.perdus}</div></div>
@@ -516,8 +517,13 @@ function rendrePageAccueil(){
   const allDates=[...new Set(Object.values(mpData).flat().map(r=>r.date))].filter(Boolean).sort().slice(-14);
   const datasets=MARKETPLACES.map(mp=>{
     const data=allDates.map(date=>{
-      const lignes=filtreMP((mpData[mp.id]||[]).filter(r=>r.date===date&&!isExclu(r.gagnant)));
-      if(!lignes.length)return null;
+      // Prendre le snapshot le plus récent de chaque journée
+      const lignesJour=filtreMP((mpData[mp.id]||[]).filter(r=>r.date===date&&!isExclu(r.gagnant)));
+      if(!lignesJour.length)return null;
+      // Trouver le dernier horodatage de cette journée
+      const hs=[...new Set(lignesJour.map(r=>r.horodatage))].sort();
+      const dernierH=hs[hs.length-1];
+      const lignes=lignesJour.filter(r=>r.horodatage===dernierH);
       const u=new Set(lignes.map(r=>r.sku)).size;
       const g=new Set(lignes.filter(r=>r.estGagnant).map(r=>r.sku)).size;
       return u>0?Math.round(g/u*100):0;
@@ -633,7 +639,8 @@ function mpDernierSnap(id){
   const data=mpData[id]||[];
   const hs=[...new Set(data.map(r=>r.horodatage))].sort();
   if(!hs.length)return[];
-  return mpFiltreMarque(id, data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)));
+  // Filtrer : dernier snapshot + non exclu + fournisseur renseigné (produit en stock)
+  return mpFiltreMarque(id, data.filter(r=>r.horodatage===hs[hs.length-1]&&!isExclu(r.gagnant)&&r.fournisseur&&r.fournisseur!=='—'));
 }
 
 function mpRefresh(id){
