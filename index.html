@@ -753,26 +753,72 @@ function mpRefreshGraphiques(id){
   _set(id+'-kpiConcSub',top?top[1]+' BuyBox':'');
 
   // Chart horaire — filtré marque + fournisseur
+  // Stratégie : pour chaque créneau, prendre aujourd'hui si dispo, sinon hier
   const heures=['10','12','14','16','18','20'];
   const base=mpFiltreMarque(id,(mpData[id]||[]).filter(r=>!isExclu(r.gagnant)));
+  // Trouver les 2 dernières dates disponibles
+  const datesDispos=[...new Set(base.map(r=>r.date))].filter(Boolean).sort();
+  const dateAuj=datesDispos[datesDispos.length-1]||'';
+  const dateHier=datesDispos[datesDispos.length-2]||'';
+
   const tph=heures.map(h=>{
-    const l=base.filter(r=>r.heure&&r.heure.startsWith(h));
-    if(!l.length)return null;
-    const u=new Set(l.map(r=>r.sku)).size;
-    const g=new Set(l.filter(r=>r.estGagnant).map(r=>r.sku)).size;
-    return u>0?Math.round(g/u*100):0;
+    // D'abord chercher aujourd'hui
+    let l=base.filter(r=>r.date===dateAuj&&r.heure&&r.heure.startsWith(h));
+    let source='auj';
+    // Si pas de données aujourd'hui pour ce créneau, prendre hier
+    if(!l.length&&dateHier){
+      l=base.filter(r=>r.date===dateHier&&r.heure&&r.heure.startsWith(h));
+      source='hier';
+    }
+    if(!l.length)return{val:null,source};
+    // Prendre le dernier snapshot de ce créneau
+    const hs=[...new Set(l.map(r=>r.horodatage))].sort();
+    const dernH=hs[hs.length-1];
+    const snap=l.filter(r=>r.horodatage===dernH);
+    const u=new Set(snap.map(r=>r.sku)).size;
+    const g=new Set(snap.filter(r=>r.estGagnant).map(r=>r.sku)).size;
+    return{val:u>0?Math.round(g/u*100):0, source};
   });
-  const vals=tph.filter(v=>v!==null);
+  const vals=tph.map(t=>t.val).filter(v=>v!==null);
   const yMax=vals.length?Math.min(100,Math.max(10,Math.ceil(Math.max(...vals)*1.25/5)*5)):100;
   const ck=id+'-chartH';
   if(charts[ck])charts[ck].destroy();
   const canvas=document.getElementById(id+'-chartH');
   if(canvas){
+    // Labels avec indication (hier) si données viennent d'hier
+    const labels=heures.map((h,i)=>tph[i].source==='hier'?h+'h*':h+'h');
+    const bgColors=tph.map(t=>{
+      if(t.val===null)return'rgba(255,255,255,0.03)';
+      const alpha=t.source==='hier'?'66':'cc'; // plus transparent si hier
+      return t.val>=50?mp.color+alpha:t.val>=25?'#f77f00'+alpha:'#f72585'+alpha;
+    });
     charts[ck]=new Chart(canvas,{
       type:'bar',
-      data:{labels:heures.map(h=>h+'h'),datasets:[{data:tph,backgroundColor:tph.map(v=>v===null?'rgba(255,255,255,0.03)':v>=50?mp.color+'cc':v>=25?'#f77f0099':'#f7258599'),borderRadius:8,borderSkipped:false}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:yMax,ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},x:{ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11}},grid:{display:false},border:{display:false}}}}
+      data:{labels,datasets:[{data:tph.map(t=>t.val),backgroundColor:bgColors,borderRadius:8,borderSkipped:false}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>{const t=tph[ctx.dataIndex];return t.val!==null?(t.val+'% '+(t.source==='hier'?'(hier)':'(aujourd'hui)')):'N/A';}}}
+        },
+        scales:{
+          y:{min:0,max:yMax,ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11},callback:v=>v+'%'},grid:{color:'rgba(120,120,255,0.06)'},border:{display:false}},
+          x:{ticks:{color:'#9090cc',font:{family:'Share Tech Mono',size:11}},grid:{display:false},border:{display:false}}
+        }
+      }
     });
+    // Légende manuelle sous le graphique
+    const hasHier=tph.some(t=>t.source==='hier');
+    if(hasHier){
+      const existing=canvas.parentNode.querySelector('.chart-legend');
+      if(!existing){
+        const leg=document.createElement('div');
+        leg.className='chart-legend';
+        leg.style.cssText='font-size:10px;color:var(--muted);font-family:"Share Tech Mono",monospace;margin-top:8px;text-align:right;';
+        leg.textContent='* données du jour précédent';
+        canvas.parentNode.appendChild(leg);
+      }
+    }
   }
 
   // Concurrents — filtré
