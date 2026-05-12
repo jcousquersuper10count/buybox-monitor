@@ -54,7 +54,7 @@ nav{background:rgba(13,13,26,0.9);border-bottom:1px solid var(--border);position
 .brand-active-tag .clear:hover{opacity:1;}
 
 /* PAGE GARDE — KPI GRID MARKETPLACES */
-.mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem;}
+.mp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:2rem;}
 .mp-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:1.75rem;position:relative;overflow:hidden;cursor:pointer;transition:all 0.25s;}
 .mp-card:hover{border-color:var(--border2);transform:translateY(-2px);}
 .mp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0;}
@@ -85,6 +85,9 @@ nav{background:rgba(13,13,26,0.9);border-bottom:1px solid var(--border);position
 .mp-fnac::before,.mp-fnac .mp-name{color:#f7c948;}
 .mp-fnac::before{background:linear-gradient(90deg,#f7c948,#f77f00);}
 .mp-fnac .mp-taux,.mp-fnac .mp-bar-fill,.mp-fnac .mp-glow{color:#f7c948;background:#f7c948;}
+.mp-manomano::before,.mp-manomano .mp-name{color:#00c9a7;}
+.mp-manomano::before{background:linear-gradient(90deg,#00c9a7,#00f5d4);}
+.mp-manomano .mp-taux,.mp-manomano .mp-bar-fill,.mp-manomano .mp-glow{color:#00c9a7;background:#00c9a7;}
 
 /* CHARTS OVERVIEW */
 .overview-charts{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem;}
@@ -216,6 +219,9 @@ footer a{color:var(--c1);text-decoration:none;}
     <div class="nav-tab" onclick="allerPage('fnac',this)" data-page="fnac">
       <span class="mp-dot" style="background:#f7c948"></span> Fnac
     </div>
+    <div class="nav-tab" onclick="allerPage('manomano',this)" data-page="manomano">
+      <span class="mp-dot" style="background:#00c9a7"></span> ManoMano
+    </div>
   </div>
 </nav>
 
@@ -274,6 +280,7 @@ footer a{color:var(--c1);text-decoration:none;}
 <div id="page-cdiscount" class="page"></div>
 <div id="page-darty" class="page"></div>
 <div id="page-fnac" class="page"></div>
+<div id="page-manomano" class="page"></div>
 
 <footer>
   BuyBox Monitor · Super10count ·
@@ -289,7 +296,8 @@ const MARKETPLACES = [
   { id:'amazon',    nom:'Amazon',    onglet:'Amazon - Données',    color:'#f77f00', cls:'mp-amazon',    link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=0df20fc1-0ef4-4165-8d19-599c4721fc79&dl=1&catalog_id=60022&list_landed_prices=true' },
   { id:'cdiscount', nom:'Cdiscount', onglet:'Cdiscount - Données', color:'#00c4ff', cls:'mp-cdiscount', link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=1c550f0d-2063-4b75-a5ce-3bbfc46addbd&dl=1&catalog_id=60016&list_landed_prices=true' },
   { id:'darty',     nom:'Darty',     onglet:'Darty - Données',     color:'#ff4b4b', cls:'mp-darty',     link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=1a734c71-0770-4e30-b6e2-56e8db0e5d2c&dl=1&catalog_id=60885&list_landed_prices=true' },
-  { id:'fnac',      nom:'Fnac',      onglet:'Fnac - Données',      color:'#f7c948', cls:'mp-fnac',      link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=063fe921-93be-414b-955d-c942e115b823&dl=1&catalog_id=60152&list_landed_prices=true' }
+  { id:'fnac',      nom:'Fnac',      onglet:'Fnac - Données',      color:'#f7c948', cls:'mp-fnac',      link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=063fe921-93be-414b-955d-c942e115b823&dl=1&catalog_id=60152&list_landed_prices=true' },
+  { id:'manomano', nom:'ManoMano', onglet:'ManoMano - Donnees', color:'#00c9a7', cls:'mp-manomano', link:'https://candysud.multiply.cloud/reports/live/public/price_vs_buybox_winner/json_display?token=561441b5-d995-43fe-a291-45b6c7fb0538&dl=1&catalog_id=80143&list_landed_prices=true' }
 ];
 
 // ── STATE ──
@@ -360,7 +368,7 @@ async function chargerTout(){
     const headers=cat.cols.map(col=>(col.label||col.id||'').toLowerCase().trim());
     console.log('En-têtes catalogue:', headers.slice(0,16));
 
-    // Trouver les index par nom d'en-tête
+    // Trouver les index par nom den-tete
     const iSKU   = headers.findIndex(h=>h==='id'||h==='sku'||h==='id produit');
     const iRef   = headers.findIndex(h=>h.includes('f') && h.includes('rence') || h==='référence'||h==='reference'||h==='référence'||h==='ref');
     const iMarque= headers.findIndex(h=>h.includes('marque')||h.includes('brand')||h.includes('fabricant'));
@@ -762,7 +770,7 @@ function mpRefreshGraphiques(id){
   const dateHier=datesDispos[datesDispos.length-2]||'';
 
   const tph=heures.map(h=>{
-    // D'abord chercher auj.
+    // First: chercher today
     let l=base.filter(r=>r.date===dateAuj&&r.heure&&r.heure.startsWith(h));
     let source='auj';
     // Si pas de données auj. pour ce créneau, prendre hier
@@ -785,7 +793,7 @@ function mpRefreshGraphiques(id){
   if(charts[ck])charts[ck].destroy();
   const canvas=document.getElementById(id+'-chartH');
   if(canvas){
-    // Labels avec indication (hier) si données viennent d'hier
+    // Labels avec indication (hier) si donnees viennent dhier
     const labels=heures.map((h,i)=>tph[i].source==='hier'?h+'h*':h+'h');
     const bgColors=tph.map(t=>{
       if(t.val===null)return'rgba(255,255,255,0.03)';
